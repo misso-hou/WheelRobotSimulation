@@ -1,0 +1,26 @@
+BasedOnStyle: Google
+IndentWidth: 2	
+ColumnLimit: 150
+Language: Cpp
+#格式设置
+
+PointerAlignment: Left #指针符号在变量名的左边
+
+#明确指定标准库，外部库，项目内部库的头文件位置
+IncludeCategories:
+-	Regex:	'^<.*>'	#标准库
+ 	Priority:	1
+-	Regex:	'^"[^"]*\.h"'	#外部库头文件
+  Priority:	2
+-	Regex:	'^[A-Za-z0-9_/]*\.h$'	#项目内部头文件
+  Priority:	3
+
+SortIncludes: true #启用 #include 排序
+MaxEmptyLinesToKeep: 1  # 函数之间最多保留1行空行
+BraceWrapping:
+  AfterFunction: true  # 确保函数体的第一个大括号后换行
+
+
+#KeepEmptyLinesAtTheStartOfBlocks: false #在头文件和源代码之间保留空行
+AllowShortIfStatementsOnASingleLine: true
+IndentCaseLabels: true #将case标签缩进

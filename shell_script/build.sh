@@ -1,0 +1,57 @@
+#!/bin/bash
+
+function RemoveFolder {
+    CURRENT_DIR=$(pwd)
+    echo "Current path is: $CURRENT_DIR"
+    Cd "$CURRENT_DIR/."
+    #检查build &件夹是否存在
+    if [ -d "build" ]; then
+        echo "Deleting existing build directory..."
+        sudo rm -r build
+    fi
+}
+
+function CreateFolder {
+    #创建新的build文件夹
+    mkdir build
+}
+
+function Compile {
+    #进入build文件夹 
+    cd build
+    #运行CMake构建
+    echo "Running CMake..."
+    cmake ..
+    #编译项目
+    make
+    echo "------Build completed-----" 
+}
+
+function Format {
+    CURRENT_DIR=$(pwd)
+    echo "Current path is: $CURRENT_DIR"
+    cd "$CURRENT_DIR/.."
+    find src -name "*.cpp" | xargs clang-format -i -style=file
+    find modules/sensor/src -name "*.cpp" | xargs clang-format -i -style=file
+    find modules/planning/src -name "*.cpp" | xargs clang-format -i -style=file 
+    find modules/logger/src -name "*.cpp" | xargs clang-format -i -style=file
+    find modules/gridmap/src -name "*.cpp" | xargs clang-format -i -style=file
+    find modules/datacenter/src -name "*.cpp" | xargs clang-format -i -style=file
+    find modules/control/src -name "*.cpp" | xargs clang-format -i -style=file
+}
+
+
+#后缓选择 
+case $1 in 
+rm)
+    RemoveFolder
+    ;;
+format) 
+    Format
+    ;;
+compile)
+    RemoveFolder CreateFolder Compile
+    ;;
+*)
+;;
+esac

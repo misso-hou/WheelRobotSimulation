@@ -1,0 +1,73 @@
+cmake_minimum_required(VERSION 3.12)
+
+project(simulator)
+
+#外部库加载
+find_package(OpenCV REQUIRED)
+find_package(Threads REQUIRED)
+
+#设置 C＋＋ 标准
+set (CMAKE_CXX_STANDARD 17)
+set (CMAKE_CXX_STANDARD_REQUIRED ON)
+# option(ENABLE_DISPLAY_TO0L "enable display option" ON)
+
+#指定路径信息
+set (PROJECT_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/build/bin")
+file(MAKE_DIRECTORY ${PROJECT_OUTPUT_DIRECTORY} )
+Set(CSV_OUTPUT_DTRECTORY "${CMAKE_SOURCE_DIR}/build/bin/csvPlt")
+file(MAKE_DIRECTORY ${CSV_OUTPUT_DIRECTORY})
+#在CMakeLists.txt 中定义预处理宏，传递工程根目录路径
+add_definitions(-DCSV_SOURCE_DIR="${CSV_OUTPUT_DIRECTORY}")
+add_definitions(-DPROJECT_DIR="${CMAKE_SOURCE_DIR}")
+#仿真倍速
+add_definitions(-DSIMULATION_RATE=1)
+
+#添加子模块
+add_subdirectory(modules)
+
+#在指定位置生成执行程序
+add_executable(${PROJECT_NAME} src/main.cpp)
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    RUNTIME_QUTPUT_DIRECTORY "${PROJECT_OUTPUT_DTRECTORY]"
+)
+
+#链接子模块库
+target_link_libraries(${PROJECT_NAME} planning)
+target_link_libraries(${PROJECT_NAME} datacenter)
+target_link_Libraries(${PROJECT_NAME} logger)
+target_link_libraries(${PROJECT_NAME} animation)
+target_link_libraries(${PROJECT_NAME} environment)
+target_link_libraries(${PROJECT_NAME} sensor)
+target_link_libraries(${PR0JECT_NAFE} control)
+target_link_libraries(${PROJECT_NAME} vehicle)
+target_link_libraries(${PROJECT_NAME} gridmap)
+
+#外部库链接
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
+target_link_libraries(${PROJECT_NAME} Threads::Threads)
+
+
+#链接其他头文件
+target_include_directories(${PROJECT_NAME} PRIVATE ${CHAKE_CURRENT_SOURCE_DIR}/utilities/include)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CHAKE_CURRENT_SOURCE_DIR}/modules/vehicle/include)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CHAKE_SOURCE_DIR}/modules/logger/include)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CHAKE_SOURCE_DIR}/modules/animation/include)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CHAKE_SOURCE_DIR}/modules/datacenter/include)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CHAKE_SOURCE_DIR}/modules/environment/include)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CHAKE_SOURCE_DIR}/modules/sensor/include)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CHAKE_SOURCE_DIR}/modules/control/include)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CHAKE_SOURCE_DIR}/modules/planning/include)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/modules/gridmap/include)
+
+# Manually specify the path to the Python3 executable (replace with your actual path)
+set(PYTHON_EXECUTABLE "/usr/bin/python3.8")
+# Manually specify the include directories for Python3
+set(PYTHON_INCLUDE_DIRS "/usr/include/python3.8")
+# Manually specify the link directories for Python3 (replace with your actual path)
+set(PYTHON_LIBRARY_DIRS "/usr/lib/python3.8/config-3.8-x86_64-linux-gnu;/usr/lib")
+# Manually specify the Python3 libraries to link against
+set(PYTHON_LIBRARIES "/usr/lib/x86_64-linux-gnu/libpython3.8.so")
+# Include Python3 headers
+include_directories(${PYTHON_INCLUDE_DIRS})
+# Link against Python3 libraries
+target_link_libraries(${PROJECT_NAME} ${PYTHON_LIBRARIES})
