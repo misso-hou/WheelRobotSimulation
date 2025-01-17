@@ -16,7 +16,7 @@
 
 namespace py = pybind11;
 namespace mpl = matplotlibcpp17;
-namespace port = utijilties::port;
+namespace port = utilities::port;
 
 namespace modules {
 namespace animation {
@@ -64,7 +64,6 @@ class Animation : public utilities::Singleton<Animation> {
   shared_ptr<mpl::figure::Figure> map_figure_ptr_;
   shared_ptr<mpl::figure::Figure> sensor_figure_ptr_;
   shared_ptr<mpl::figure::Figure> space_figure_ptr_;
-
   // background
   py::object env_background_;
   py::object env_base_background_;
@@ -97,21 +96,22 @@ class Animation : public utilities::Singleton<Animation> {
   void PlotVisionBoundary();
   void PlotPointsOnPath();
   void PlotTargetOutline();
-  //算法相关特定数据显示
+  // 算法相关特定数据显示
   // mpc
   void PlotMPCHrizon();
   //动态系统避障
   void DynSysAvoidDisplay();
   void PlotAvoidAgents(const vector<port::CircleAgent>& avoid_agents);
   void PlotAvoidAgentsConvex();
-  void PlotObsSandCPpints();
-  void PlotClVirtualObs();
+  void PlotObsSandCPoints();
+  void PlotC1VirtualObs();
   void PlotAgentVelVector(const port::CircleAgent& agent);
   void PlotAgentObsQuiver(const port::CircleAgent& agent);
 
  public:
   void SetTrackingData(const port::CommonPose& robot_pose, const port::Twist& cmd, const mesh2D& path, const mesh2D& sp_curve,
                        const mesh2D& dg_border, const port::CommonPose& target, const bool erase, const bool blade);
+
   void SetObsData(const port::CommonPose& sync_pose, const vector<float>& sensor_obs, const vector<float>& map_obs);
 
   void EnvironmentDisplay();
@@ -132,7 +132,6 @@ class Animation : public utilities::Singleton<Animation> {
   mesh2D map_boundary_;
   vector<mesh2D> plot_lineJ;
   port::CommonPose target_;
-
   vector<pair<vector<float>, vector<float>>> orin_obs_;
   vector<Eigen::Vector2f> sensor_obs_;
   vector<Eigen::Vector2f> map_obs_;

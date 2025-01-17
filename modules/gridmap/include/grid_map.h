@@ -1,14 +1,18 @@
 #pragma once
+
 #include <Eigen/Core>
-#include <Eigen/Geomet ry>
+#include <Eigen/Geometry>
 #include <iostream>
 #include <vector>
 
 #include "common_port/data_port.h"
+
 namespace port = utilities::port;
+
 namespace modules {
 namespace gridmap {
-//地图内部数据类型定义!
+
+//地图内部数据类型定义
 using Matrix = Eigen::MatrixXf;
 using DataType = Matrix::Scalar;
 using Position = Eigen::Vector2f;
@@ -18,10 +22,10 @@ using Size = Eigen::Array2i;
 using Length = Eigen::Array2f;
 using Time = uint64_t;
 
-class GrldMap {
+class GridMap {
  public:
-  GridMap(const float& height, const float& width, const float& resolution, const float& back_helght);
-  virtual* GridMap() = default;
+  GridMap(const float& height, const float& width, const float& resolution, const float& back_height);
+  virtual ~GridMap() = default;
   vector<Position> GridMapUpdate(const vector<Position>& sensor_data, const port::CommonPose& sync_pose);
 
  private:
@@ -29,9 +33,9 @@ class GrldMap {
   bool IsInPolygon(const Position& pos, const vector<Position>& polygon);
 
  private:
-  Matrix aap_data_;
+  Matrix map_data_;
   Matrix sensor_erase_data_;
-  Length Length_;
+  Length length_;
   float back_height_;
   float resolution_;
   Size size_;

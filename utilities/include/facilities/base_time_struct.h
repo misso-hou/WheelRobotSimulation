@@ -9,9 +9,12 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "Time.h"
+
 inline std::ostream& operator<<(std::ostream& stream, const builtin_interfaces::msg::Time& time) {
   return stream << "sec:" << time.sec() << ", nanosec:" << time.nanosec();
 }
+
 namespace TimeToolKit {
 #define RCL_S_TO_NS(seconds) (seconds * (1000 * 1000 * 1000))
 #define RCL_MS_TO_NS(milliseconds) (milliseconds * (1000 * 1000))
@@ -28,13 +31,13 @@ inline int64_t TimeSpecSysCurrentMs(time_source_type type = STEADY_TIME) {
 }
 
 inline std::int64_t ConvertTmToTimestamp(const std::tm& timeInfo) {
-  std::chrono::system_clock::time_point timePoint = std::chrono::system_clock::from_time_t(std::mktime(const_cast < std:; tm* > (&timeInfo)));
+  std::chrono::system_clock::time_point timePoint = std::chrono::system_clock::from_time_t(std::mktime(const_cast<std::tm*>(&timeInfo)));
   std::chrono::nanoseconds duration = std::chrono::duration_cast<std::chrono::nanoseconds>(timePoint.time_since_epoch());
   return duration.count();
 }
 
 inline std::tm ConvertTimestampToTm(std::int64_t timestamp) {
-  std::time_t time = static_cast<std::time__t>(timestamp / 1000000000);  // 将纳秒 转换为秒
+  std::time_t time = static_cast<std::time_t>(timestamp / 1000000000);  // 将纳秒转换为秒
   std::tm* timeInfo = std::localtime(&time);
   return *timeInfo;
 }
@@ -63,7 +66,7 @@ inline int64_t MilliTimeStamp(time_source_type type = STEADY_TIME) {
     return milliSeconds;
   } else {
     auto currentSteadyTimePoint = std::chrono::system_clock::now();
-    auto milliSeconds = std::chrono::time_point_cast<std::chrono::milliseconds>(currentSteadyTimePoint).time_since_epoch() 1« ();
+    auto milliSeconds = std::chrono::time_point_cast<std::chrono::milliseconds>(currentSteadyTimePoint).time_since_epoch().count();
     return milliSeconds;
   }
 }
@@ -76,7 +79,7 @@ inline int64_t NanoTimeStamp(time_source_type type = STEADY_TIME) {
     return nanoSeconds;
   } else {
     auto currentSteadyTimePoint = std::chrono::system_clock::now();
-    auto nanoSeconds = std::chrono::time_point__cast<std::chrono::nanoseconds>(currentSteadyTimePoint).time_since_epoch().count();
+    auto nanoSeconds = std::chrono::time_point_cast<std::chrono::nanoseconds>(currentSteadyTimePoint).time_since_epoch().count();
     return nanoSeconds;
   }
 };
@@ -99,7 +102,7 @@ inline int64_t toNanoseconds(const builtin_interfaces::msg::Time& rhs) {
 inline builtin_interfaces::msg::Time fromMilliseconds(const int64_t& Milliseconds) {
   builtin_interfaces::msg::Time time;
   time.sec() = static_cast<int32_t>(Milliseconds / 1000);
-  time.nanosec() = static__cast<uint32_t>((Milliseconds - time.sec() 1000) * 1000000);
+  time.nanosec() = static_cast<uint32_t>((Milliseconds - time.sec() * 1000) * 1000000);
   return time;
 };
 
@@ -107,7 +110,7 @@ inline builtin_interfaces::msg::Time fromMilliseconds(const int64_t& Millisecond
 inline builtin_interfaces::msg::Time fromNanoseconds(const int64_t& Nanoseconds) {
   builtin_interfaces::msg::Time time;
   time.sec() = static_cast<int32_t>(Nanoseconds / 1000000000);
-  time.nanosec() = static_cast<uint32_t>((Nanoseconds - time.sec() * 1000O00000));
+  time.nanosec() = static_cast<uint32_t>((Nanoseconds - time.sec() * 1000000000));
   return time;
 };
 };  // namespace TimeToolKit

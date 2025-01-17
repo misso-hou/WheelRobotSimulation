@@ -1,12 +1,13 @@
 #pragma once
+
 #include <iostream>
 #include <cmath>
 #include <vector>
+
 #include "common_port/data_port.h"
 
 using namespace std;
 namespace port = utilities::port;
-
 
 namespace modules { 
 namespace vehicle {

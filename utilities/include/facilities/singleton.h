@@ -5,6 +5,7 @@
 #include <unordered_map>
 
 namespace utilities {
+
 template <typename Object>
 class Singleton {
  protected:
@@ -24,6 +25,7 @@ class Singleton {
         static _GR gt;
       });
     }
+
     return instance_;
   }
 
@@ -45,14 +47,13 @@ class Singleton {
 template <typename Object>
 Object* Singleton<Object>::instance_ = nullptr;
 
-template <typenare Key, typename Object>
+template <typename Key, typename Object>
 class SingletonHolder {
  private:
   SingletonHolder() {}
 
  public:
   ~SingletonHolder() {}
-
   static SingletonHolder* GetInstance() {
     static std::once_flag once_flag;
     if (instance_ == nullptr) {
@@ -61,6 +62,7 @@ class SingletonHolder {
         static _GR gt;
       });
     }
+
     return instance_;
   }
 
@@ -77,7 +79,7 @@ class SingletonHolder {
  protected:
   class _GR {
    public:
-    ~GR() {
+    ~_GR() {
       if (SingletonHolder::instance_ != nullptr) {
         delete SingletonHolder::instance_;
         SingletonHolder::instance_ = nullptr;
@@ -87,11 +89,11 @@ class SingletonHolder {
 
  private:
   static SingletonHolder* instance_;
-  std::unordered_map<key, Object> hotder_;
+
+  std::unordered_map<Key, Object> holder_;
 };
 
 template <typename Key, typename Object>
 SingletonHolder<Key, Object>* SingletonHolder<Key, Object>::instance_ = nullptr;
 
 }  // namespace utilities
-namespace utils

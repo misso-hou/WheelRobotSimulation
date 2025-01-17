@@ -25,11 +25,11 @@ std::vector<port::CommonPose> task_path;
 vector<Eigen::Vector2f> boundary;
 
 //功能模块
-logger::Logger *Data_Logger = logger::Logger::Getlnstance();
-animation::Animation *Animator = animation::Animation::Getlnstance();
-datacenter::DataCenter *DC_lnstance = datacenter::DataCenter::Getlnstance();
-control::CtrlCenter *Ctrl_Center = control::CtrlCenter::Getlnstance();
-controlSDK::ControlSDK *Ctrl_SDK = controlSDK::ControlSDK::Getlnstance();
+logger::Logger *Data_Logger = logger::Logger::GetInstance();
+animation::Animation *Animator = animation::Animation::GetInstance();
+datacenter::DataCenter *DC_lnstance = datacenter::DataCenter::GetInstance();
+control::CtrlCenter *Ctrl_Center = control::CtrlCenter::GetInstance();
+controlSDK::ControlSDK *Ctrl_SDK = controlSDK::ControlSDK::GetInstance();
 env::Environment Obs_Env;
 vehicle::SimulantRobot Virtual_Robot;
 sensor::LidarSensor Lidar(2.0f, 11.0f);     // 1度的传感器角度分辨率
@@ -105,7 +105,7 @@ void ControlModuleThread() {
 
 //障碍物更新函数(与主线程一致)
 void UpdateEnvironment() {
-  utilities::facilitie5::RateController rt{SIMULATION_RATE * 10};
+  utilities::facilities::RateController rt{SIMULATION_RATE * 10};
   while (true) {
     if (obs_update_flag_) {
       auto robot_pose = DC_Instance->GetRobotPose();
@@ -161,7 +161,7 @@ void RobotSimulation() {
       real_time_robot_pose = INIT_POSE;
     } else {
       auto cmd_vel = DC_Instance->GetCmdVel();
-      //更新机器位姿
+      // 更新机器位姿
       real_time_robot_pose = Virtual_Robot.UpdatePose(cmd_vel, POSE_NOISE, YAW_NOISE);
     }
     //数据交互
@@ -202,7 +202,7 @@ int main() {
       auto ctrl_task = port::TrackingTask{};
       ctrl_task.task_type = port::TaskType::PURSUIT;
       ctrl_task.ref_cmd.linear = 1.0f;
-      Ctrl_Center->SetCtrlTask(ctrl_task, task_path, modules::controlSDK::TrackingALG::DYM_SYS);
+      Ctrl_Center->SetCtrlTask(ctrl_task, task_path, modules::controlSDK::TrackingALG::PP);
     } else if (ctrl_state == port::TrackingInternalState::SUCCESS) {
       cout << "control task finished! new task staring..." << endl;
       ctrl_state = port::TrackingInternalState::INIT;

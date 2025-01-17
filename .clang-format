@@ -1,6 +1,7 @@
 BasedOnStyle: Google
-IndentWidth: 2	
+IndentWidth: 2
 ColumnLimit: 150
+
 Language: Cpp
 #格式设置
 
@@ -16,11 +17,8 @@ IncludeCategories:
   Priority:	3
 
 SortIncludes: true #启用 #include 排序
-MaxEmptyLinesToKeep: 1  # 函数之间最多保留1行空行
-BraceWrapping:
-  AfterFunction: true  # 确保函数体的第一个大括号后换行
 
+KeepEmptyLinesAtTheStartOfBlocks: true #在头文件和源代码之间保留空行
 
-#KeepEmptyLinesAtTheStartOfBlocks: false #在头文件和源代码之间保留空行
 AllowShortIfStatementsOnASingleLine: true
 IndentCaseLabels: true #将case标签缩进

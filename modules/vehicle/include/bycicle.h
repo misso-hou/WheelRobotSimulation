@@ -5,7 +5,9 @@
 #include <iostream>
 
 #include "common_port/data_port.h"
+
 using namespace std;
+
 namespace modules {
 namespace vehicle {
 
@@ -22,7 +24,7 @@ class Bycicle {
   }
   virtual ~Bycicle(){};
 
-  state stateUpdate(const state& x, const input& u, const float& dt);
+  state StateUpdate(const state& x, const input& u, const float& dt);
   void LinearizedSS(state& x_ref, input& u_ref);
   tuple<matXf, matXf, matXf> TrackingErrorSS(const float& v_ref, const float& K, const float& dt);
   void DiscreteRK4(matXf& A, matXf& B, state& X, input& U, float& sample_period);
@@ -35,5 +37,6 @@ class Bycicle {
   int n_input_;
   int RK_steps_;
 };
+
 }  // namespace vehicle
 }  // namespace modules

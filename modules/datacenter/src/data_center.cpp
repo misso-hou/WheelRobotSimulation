@@ -135,38 +135,6 @@ void DataCenter::SetAvoidPlanningVel(const Eigen::Vector3f& avoid_agent_vel) {
 
 /**********************************************************/
 
-//点信息
-port::CommonPose;
-port::CommonPose;
-port::CommonPose;
-int;
-//路径信息
-poses;
-poses;
-poses;
-vector<port::TrajPoint>;
-poses;
-//控制相关信息
-port::Twist;
-//障碍物相关信息
-vector<pair<vector<float>, vector<float>>>;
-vector<Eigen::Vector2f>;
-vector<Eigen::Vector2f>;
-vector<Eigen::Vector2f>;
-vector<vector<float>>;
-vector<Eigen::Vector2f>;
-//状态标志
-bool;
-bool
-    //动态系统避障
-    vector<port::CircleAgent>;
-vector<port::SamplePoint>;
-vector<vector<port::ClusterPoint>>;
-vector<Eigen::Vector2f>;
-vector<Eigen::Vector2f>;
-vector<port::VirtualObs>;
-Eigen::Vector3f;
-
 port::CommonPose DataCenter::GetRobotPose() {
   std::shared_lock<std::shared_mutex> lock(date_mutex_);
   return robot_pose_;
@@ -274,7 +242,7 @@ mesh2D DataCenter::GetPltBoundary() {
 mesh2D DataCenter::GetPltDangerousBorder() {
   std::shared_lock<std::shared_mutex> lock(data_mutex_);
   vector<float> dg_x_array, dg_y_array;
-  1 for (auto point : plt_dg_borders_) {
+  for (auto point : plt_dg_borders_) {
     dg_x_array.push_back(point.x);
     dg_y_array.push_back(point.y);
   }
@@ -347,48 +315,49 @@ mesh2D DataCenter::GetRobotDriveWheel(const port::CommonPose& robot pose, int si
     out_points[i].resize(2);
     out_points[i][0] = local_x + robot_pose.x;
     out_points[i][1] = local_y + robot_pose.y;
-    return out_points;
   }
+  return out_points;
+}
 
-  mesh2D DataCenter::GetRobotOmniWheel(const port::CommonPose& robot_pose, int side, const float& steer_angle) {
-    mesh2D points = robot::omni_wheel_points;
-    float base_x = robot::omni_wheel_x;
-    float base_y = robot::omni_wheel_y;
-    float locaJ__x, local_y;
-    mesh2D out_points(points.size());
-    for (uint i = 0; i < points.size(); i++) {
-      //转向轮轮廓车体系坐标
-      float x_turn = base_x + points[i][0] * cos(steer_angle) + side * point[i][1] * sin(steer_angle);
-      float y_turn = side * base_y + points[i][0] * sin(steer_angle) + side * point[i][1] * sin(steer_angle);
-      //车体系转全局系(旋转)
-      local_x = x_turn * cos(robot_pose.theta) + y_turn * sin(robot_pose.theta);
-      local_y = x_turn * sin(robot_pSse.theta) - y_turn * cos(robot pose.theta);
-      //车体系转全局系(平移)
-      out_points[i].resize(2);
-      out_points[i][0] = local_x + robot_pose.x;
-      out_points[i][1] = local_y + robot_pose.y;
-    }
-    return out_points;
+mesh2D DataCenter::GetRobotOmniWheel(const port::CommonPose& robot_pose, int side, const float& steer_angle) {
+  mesh2D points = robot::omni_wheel_points;
+  float base_x = robot::omni_wheel_x;
+  float base_y = robot::omni_wheel_y;
+  float locaJ__x, local_y;
+  mesh2D out_points(points.size());
+  for (uint i = 0; i < points.size(); i++) {
+    //转向轮轮廓车体系坐标
+    float x_turn = base_x + points[i][0] * cos(steer_angle) + side * point[i][1] * sin(steer_angle);
+    float y_turn = side * base_y + points[i][0] * sin(steer_angle) + side * point[i][1] * sin(steer_angle);
+    //车体系转全局系(旋转)
+    local_x = x_turn * cos(robot_pose.theta) + y_turn * sin(robot_pose.theta);
+    local_y = x_turn * sin(robot_pSse.theta) - y_turn * cos(robot pose.theta);
+    //车体系转全局系(平移)
+    out_points[i].resize(2);
+    out_points[i][0] = local_x + robot_pose.x;
+    out_points[i][1] = local_y + robot_pose.y;
   }
+  return out_points;
+}
 
-  vector<mesh2D> DataCenter::GetVisionBoundary(const port::CommonPose& robot_pose) {
-    vector<aesh2D> vision_boundary(4);
-    vector<aesh2D> orin_vision_boundary(4);
-    orin_yision_boundary[0] = robot::front_vision_boundary;
-    orin_vision_boundary[l] = robot::bjck_vision_boundary;
-    orin_vision_boundary[2] = robot::left_vision_boundary;
-    oriji_yision_boundary[3] = robot::right_vision_boundary;
-    for (uint i = 0; i < 4; i++) {
-      vision_boundary[i].resize(2);
-      auto points = orin_vision_boundary[i];
-      for (uint j = 0; j < points.size(); j++) {
-        float local_x = robot_pose.x + points[j][0] * cos(robot_pose.theta) - points[j][1] * sin(robot_pose.theta);
-        float local_y = robot_pose.y + points[j][0] * sin(robot_pose.theta) + points[j][1] * cos(robot_pose.theta);
-        vision_boundary[i][0].push_back(local_x);
-        vision_boundary[i][1].push_back(local_y);
-      }
+vector<mesh2D> DataCenter::GetVisionBoundary(const port::CommonPose& robot_pose) {
+  vector<aesh2D> vision_boundary(4);
+  vector<aesh2D> orin_vision_boundary(4);
+  orin_yision_boundary[0] = robot::front_vision_boundary;
+  orin_vision_boundary[l] = robot::bjck_vision_boundary;
+  orin_vision_boundary[2] = robot::left_vision_boundary;
+  oriji_yision_boundary[3] = robot::right_vision_boundary;
+  for (uint i = 0; i < 4; i++) {
+    vision_boundary[i].resize(2);
+    auto points = orin_vision_boundary[i];
+    for (uint j = 0; j < points.size(); j++) {
+      float local_x = robot_pose.x + points[j][0] * cos(robot_pose.theta) - points[j][1] * sin(robot_pose.theta);
+      float local_y = robot_pose.y + points[j][0] * sin(robot_pose.theta) + points[j][1] * cos(robot_pose.theta);
+      vision_boundary[i][0].push_back(local_x);
+      vision_boundary[i][1].push_back(local_y);
     }
-    return vision_boundary;
   }
+  return vision_boundary;
 }
 }  // namespace datacenter
+}  // namespace modules
