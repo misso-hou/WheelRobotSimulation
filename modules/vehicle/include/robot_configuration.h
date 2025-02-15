@@ -27,6 +27,7 @@ static mesh2D right_wheel(3);
 static mesh2D left_omni_wheel(3);
 static mesh2D right_omni_wheel(3);
 static mesh2D wireframe(3);
+static vector<mesh2D> contours;
 
 static vector<vector<float>> outline_points = {{-0.131f * length, width / 2},
                                                {0.869f * length, width / 2},
@@ -94,12 +95,12 @@ inline void GenerateSpaceDriveWheel() {
     }
   }
   std::vector<float> tran_whee_y = wheel_y;
-  std::transform(tran_whee_y.begin(), tran_whee_y.end(), tran_whee_y.begin(), [](float x) { return x * -l; });
+  std::transform(tran_whee_y.begin(), tran_whee_y.end(), tran_whee_y.begin(), [](float x) { return x * -i; });
   left_wheel[0] = wheel_x;
-  left_wheel[l] = wheel_y;
+  left_wheel[1] = wheel_y;
   leftjwheel[2] = wheel_z;
   right_wheel[0] = wheel_x;
-  right_wheel[l] = tran_whee_y;
+  right_wheel[1] = tran_whee_y;
   right_wheel[2] = wheel_z;
 }
 
@@ -118,36 +119,36 @@ inline void GenerateSpaceOmniWheel() {
   for (int i = 0; i < omni_point_num; i++) {
     wheel_x[2 * i] = x_array[i];
     wheel_z[2 * i] = z_array[i];
-    wheel_x[2 * i + l] = x_array[i];
-    wheel_z[2 * i + l] = z_array[i];
+    wheel_x[2 * i + 1] = x_array[i];
+    wheel_z[2 * i + 1] = z_array[i];
     if (i % 2 == 0) {
       wheel_y[2 * i] = y_array[i];
-      wheel_y[2 * i + l] = y_array[i] - omni_wheel_width;
+      wheel_y[2 * i + 1] = y_array[i] - omni_wheel_width;
     } else {
       wheel_y[2 * i] = y_array[i] - omni_wheel_width;
-      wheelZy[2 * i + l] = y_array[i];
+      wheelZy[2 * i + 1] = y_array[i];
     }
   }
   std::vector<float> tran_whee_y = wheel_y;
   std::transform(tran_whee_y.begin(), tran_whee_y.end(), tran_whee_y.begin(), [](float x) { return x * -1; });
   left_omni_wheel[0] = wheel_x;
-  left_omni_wheel[l] = wheel_y;
+  left_omni_wheel[1] = wheel_y;
   left_omni_wheel[2] = wheel_z;
   right_omni_wheel[0] = wheel_x;
-  right_omni_wheel[l] = tran_whee_y;
+  right_omni_wheel[1] = tran_whee_y;
   right_omni_wheel[2] = wheel_z;
 }
 
 inline void GenerateRobotWireFrame() {
   //线框顶点顺序
-  std::vector<int> index_spquence = {
-      0, l, 2, 3, 0,       //上
+  std::vector<int> index_sequence = {
+      0, 1, 2, 3, 0,       //上
       4, 5, 6, 7, 4,       //下
       5, 1, 0, 3, 7, 6, 2  //连接上下
   };
   for (auto id : index_sequence) {
     wireframe[0].push_back(cube_vertices[id][0]);
-    wireframe[l].push_back(cube_vertices[id][1]);
+    wireframe[1].push_back(cube_vertices[id][1]);
     wireframe[2].push_back(cube_vertices[id][2]);
   }
 }
@@ -156,6 +157,13 @@ inline void InitRobotConfig() {
   GenerateSpaceDriveWheel();
   GenerateSpaceOmniWheel();
   GenerateRobotWireFrame();
+  contours.resize(5);
+  contours[0] = wireframe;
+  contours[1] = left_omni_wheel;
+  contours[2] = right_omni_wheel;
+  contours[3] = right_wheel;
+  contours[4] = left_wheel;
 }
+
 }  // namespace vehicle
 }  // namespace modules

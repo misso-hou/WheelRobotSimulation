@@ -1,9 +1,9 @@
 #include "grid_map.h"
 
 #include "robot_configuration.h"
+#include "tools/math_tools.h"
 
 #include "opencv2/opencv.hpp"
-#include "tools/math_tools. h"
 
 using namespace modules;
 namespace mathTools = utilities::mathTools;
@@ -11,7 +11,7 @@ namespace mathTools = utilities::mathTools;
 namespace modules {
 namespace gridmap {
 
-/*
+/**
  * @brief:删格地图构造
  * @params:
  *    length:地图长宽(m)
@@ -51,7 +51,7 @@ void GridMap::SensorEraseLayerInit() {
     new_vertex << point[0], point[1];
     sensor_polygon_[0].push_back(new_vertex);
   }
-  for (auto point : vehicle::right_vision_boundary) {
+  for (auto point : vehicle::left_vision_boundary) {
     Position new_vertex;
     new_vertex << point[0], point[1];
     sensor_polygon_[1].push_back(new_vertex);
@@ -68,13 +68,13 @@ void GridMap::SensorEraseLayerInit() {
   }
 }
 
-/*
- * ebrief: 判断点是否在polygon内部(射线法)
+/**
+ * @brief: 判断点是否在polygon内部(射线法)
  * @params:
  *	pos:点坐标
  *	polygon: polygon顶点
  */
-bool GridMap::lslnPolygon(const Position& pos, const vector<Position>& polygon) {
+bool GridMap::IslnPolygon(const Position& pos, const vector<Position>& polygon) {
   int n = polygon.size();
   bool inside = false;
   for (int i = 0; i < n; ++i) {
@@ -112,7 +112,7 @@ vector<Position> GridMap::GridMapUpdate(const vector<Position>& sensor_data, con
   for (auto point : copy_map_obs) {
     port::CommonPose point_pose(point(0), point(1), 0.f);
     auto trans_pose = mathTools::Global2Rob(sync_pose, point_pose);
-    if (trans_pose.x > length_(0) || trans_pose.x < -back_height_ || trans_pose.y > length_(1) / 2 || trans_pose.y < -length_(l) / 2) {
+    if (trans_pose.x > length_(0) || trans_pose.x < -back_height_ || trans_pose.y > length_(1) / 2 || trans_pose.y < -length_(1) / 2) {
       continue;
     }
     Position local_point;
@@ -125,7 +125,7 @@ vector<Position> GridMap::GridMapUpdate(const vector<Position>& sensor_data, con
       }
     }
     if (in_polygon) continue;
-    gLobal_orin_obs_.push_back(point);
+    global_orin_obs_.push_back(point);
     local_orin_obs_.push_back(local_point);
   }
   // step02->更新传感器数据
@@ -144,9 +144,9 @@ vector<Position> GridMap::GridMapUpdate(const vector<Position>& sensor_data, con
   // step03->构造局部删格地图
   map_data_.setZero();
   for (auto point : local_orin_obs_) {
-    int index__x = static_cast<int>(round((point(0) + back_height_) / resolution_));
+    int index_x = static_cast<int>(round((point(0) + back_height_) / resolution_));
     int index_y = static_cast<int>(round((point(1) + length_(1) / 2) / resolution_));
-    if (index_x > size_(0) - 1 || index_y > size_(1) - 2 || index__x < 0 || index_y < 0) {
+    if (index_x > size_(0) - 1 || index_y > size_(1) - 1 || index_x < 0 || index_y < 0) {
       continue;
     } else {
       map_data_(index_x, index_y) = 1;

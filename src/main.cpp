@@ -25,11 +25,10 @@ std::vector<port::CommonPose> task_path;
 vector<Eigen::Vector2f> boundary;
 
 //功能模块
-logger::Logger *Data_Logger = logger::Logger::GetInstance();
-animation::Animation *Animator = animation::Animation::GetInstance();
-datacenter::DataCenter *DC_lnstance = datacenter::DataCenter::GetInstance();
-control::CtrlCenter *Ctrl_Center = control::CtrlCenter::GetInstance();
-controlSDK::ControlSDK *Ctrl_SDK = controlSDK::ControlSDK::GetInstance();
+logger::Logger* Data_Logger = logger::Logger::GetInstance();
+animation::Animation* Animator = animation::Animation::GetInstance();
+datacenter::DataCenter* DC_lnstance = datacenter::DataCenter::GetInstance();
+control::ControlCenter* Ctrl_Center = control::ControlCenter::GetInstance();
 env::Environment Obs_Env;
 vehicle::SimulantRobot Virtual_Robot;
 sensor::LidarSensor Lidar(2.0f, 11.0f);     // 1度的传感器角度分辨率
@@ -97,8 +96,9 @@ void MapUpdateThread() {
 //控制模块线程
 void ControlModuleThread() {
   utilities::facilities::RateController rt{SIMULATION_RATE * 50};
+  Ctrl_Center->Init();
   while (true) {
-    Ctrl_SDK->ControlThread();
+    Ctrl_Center->ControlThread();
     rt.Spin();
   }
 }
@@ -126,7 +126,7 @@ void UpdateEnvironment() {
 }
 
 //路径规划模块
-void PathPlanning(bool &update_flag) {
+void PathPlanning(bool& update_flag) {
   if (update_flag) {
     auto start_pose = DC_Instance->GetRobotPose();
     // 曲线路径
@@ -202,7 +202,7 @@ int main() {
       auto ctrl_task = port::TrackingTask{};
       ctrl_task.task_type = port::TaskType::PURSUIT;
       ctrl_task.ref_cmd.linear = 1.0f;
-      Ctrl_Center->SetCtrlTask(ctrl_task, task_path, modules::controlSDK::TrackingALG::PP);
+      Ctrl_Center->SetControlTask(ctrl_task, task_path, control::function::CtrlALG::PP);
     } else if (ctrl_state == port::TrackingInternalState::SUCCESS) {
       cout << "control task finished! new task staring..." << endl;
       ctrl_state = port::TrackingInternalState::INIT;
@@ -210,7 +210,7 @@ int main() {
       obs_update_flag_ = true;
       continue;
     }
-    ctrl_state = Ctrl_Center->GetTrackingResult();
+    ctrl_state = Ctrl_Center->GetControlResult();
     rt.Spin();
   }
 

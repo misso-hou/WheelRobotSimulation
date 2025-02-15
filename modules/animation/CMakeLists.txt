@@ -8,18 +8,18 @@ find_package(pybind11 REQUIRED)
 find_package(matplotlibcpp17 REQUIRED)
 
 #建立子库
-file(GLOB_RECURSE SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp) 
+file(GLOB SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp) 
 add_library(${PROJECT_NAME} STATIC ${SRC_FILES})
 
 #链接自身头文件
-target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 #链接其他头文件
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/utilities/include)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/modules/datacenter/include)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/modules/vehicle/include)
 
-#外部库链接	
+#外部库链接
 target_link_libraries(${PROJECT_NAME} datacenter)
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
 
@@ -37,4 +37,3 @@ set(PYTHON_LIBRARIES "/usr/lib/x86_64-linux-gnu/libpython3.8.so")
 include_directories(${PYTHON_INCLUDE_DIRS})
 # Link against Python3 libraries
 target_link_libraries(${PROJECT_NAME} ${PYTHON_LIBRARIES})
-    

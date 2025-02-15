@@ -118,7 +118,8 @@ class Animation : public utilities::Singleton<Animation> {
   void CmdMonitor(int buffer_length);
   void MapDisplay();
   void ObsMonitor();
-  void SpaceRobot(const float& rate);  //速度规划显示
+  void SpaceRobot(const float& rate);
+  //速度规划显示
   void SurfaceVelPlanning(int T);
 
  private:  //显示数据
@@ -130,7 +131,7 @@ class Animation : public utilities::Singleton<Animation> {
   mesh2D sharp_curve_;
   mesh2D dg_border_;
   mesh2D map_boundary_;
-  vector<mesh2D> plot_lineJ;
+  vector<mesh2D> plot_line_;
   port::CommonPose target_;
   vector<pair<vector<float>, vector<float>>> orin_obs_;
   vector<Eigen::Vector2f> sensor_obs_;

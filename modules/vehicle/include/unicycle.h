@@ -1,4 +1,5 @@
 #pragma once
+
 #include <Eigen/Dense>
 #include <Eigen/SparseCore>
 #include <iostream>
@@ -17,8 +18,8 @@ using smatf = Eigen::SparseMatrix<float>;
 
 class Unicycle {
  public:
-  // 8加:待优化,考虑速度信息
-  Unicycle(const float& min_w, const float& max_w, const float& min_w_dot, const rloat& max_w_dot) {
+  // todo:待优化,考虑速度信息
+  Unicycle(const float& min_w, const float& max_w, const float& min_w_dot, const float& max_w_dot) {
     n_state_ = 2;
     n_input_ = 1;
     min_w_ = min_w;
@@ -26,21 +27,21 @@ class Unicycle {
     min_w_dot_ = min_w_dot;
     max_w_dot_ = max_w_dot;
   }
-  virtual * ~Unicycle(){};
+  virtual ~Unicycle(){};
 
  public:
   port::CommonPose StateUpdate(const port::CommonPose& cur_pose, const float& cur_v, const float& cur_w, const float& dt);
   void LinearizedSS(state& x_ref, input& u_ref);
-  tuple<smatf, smatf, smatf> TrackingErrorSS(const float& v_ref, const float& Kz const float& dt);
-  int GetstateNum();
+  tuple<smatf, smatf, smatf> TrackingErrorSS(const float& v_ref, const float& K, const float& dt);
+  int GetStateNum();
   int GetInputNum();
-  pair<Eigen::VectorXd, Eigen::VectorXd> GetlnputLimit();
+  pair<Eigen::VectorXd, Eigen::VectorXd> GetInputLimit();
   pair<Eigen::VectorXd, Eigen::VectorXd> GetInputDotLimit();
 
  private:
   int n_state_;
   int n_input_;
-  //机嚣物壁束
+  //机器物理约束
   float min_w_;
   float max_w_;
   float min_w_dot_;

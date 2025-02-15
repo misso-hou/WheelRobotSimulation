@@ -20,7 +20,10 @@ namespace TimeToolKit {
 #define RCL_MS_TO_NS(milliseconds) (milliseconds * (1000 * 1000))
 #define RCL_NS_TO_S(nanoseconds) (nanoseconds / (1000 * 1000 * 1000))
 #define RCL_NS_TO_MS(nanoseconds) (nanoseconds / (1000 * 1000))
-enum time_source_type { SYSTEM_TIME, STEADY_TIME };
+enum time_source_type {
+  SYSTEM_TIME, /*系统时间,会随着系统的时间调整而发生变更*/
+  STEADY_TIME  /*系统启动相对时间,不会随着系统的世界调整而发生变更*/
+};
 
 inline int64_t TimeSpecSysCurrentMs(time_source_type type = STEADY_TIME) {
   if (type == STEADY_TIME) {

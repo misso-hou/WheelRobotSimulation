@@ -116,7 +116,7 @@ struct ControlParam {
   float max_omega = 0.f;            //最大角速度
   float heading_error_lim_v = 0.f;  //直线跟踪误差较大时约束线速度
   float acceleration = 0.f;         //加速度约束
-  float deceleration = 0.f;         //减速度约束（正常减速，保证平滑，停瞭减速可以设置更大）
+  float deceleration = 0.f;         //减速度约束（正常减速，保证平滑，停障减速可以设置更大）
   float dg_limit_v = 0.f;           //危险边界约束速度
 };
 
@@ -130,9 +130,6 @@ struct CtrlThreshold {
   int out_curve_dis_thd_ = 0;        //出弯道距离约束阈值（出弯道不立刻加速）
   int short_path_thd_ = 0;           //短路径判断阈值（根据路径点个数）
   int overtime_thd_ = 0;             //终点跟踪超时阈值（任务异常判断）
-                                     // float switch_angle_thd;	// dwa跟踪角度阚值
-                                     // float around_to_follow_thd;	//绕障模式切回跟踪模式的距离条件
-                                     // float terminal_obs_stop_range_thd; // 路径终点附近停障范围
 };
 
 /*控制模块内部状态结果*/
@@ -204,7 +201,7 @@ typedef struct {
   Eigen::Vector2f pose;  // point pose
   int clusterID;         // clustered ID
   uint index;            // 原点集中的索引
-} clusterPoint;
+} ClusterPoint;
 
 /*********算法数据类型定义***********/  // note:display tool与trackingsdk存在交叉编译问题
                                         //角度分区采样点

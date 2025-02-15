@@ -84,9 +84,9 @@ vector<vector<float>> LidarSensor::ObsDetectByReflect(const port::CommonPose& se
       for (auto point : intersections) {
         float dist = bg::distance(ray_origin, point);
         if (dist < min_dist) {
-          i min_dist = dist;
+          min_dist = dist;
           lidar_data_[0][i] = bg::get<0>(point);
-          lidar_data_[l][i] = bg::get<1>(point);
+          lidar_data_[i][i] = bg::get<1>(point);
         }
       }
       //转到局部坐标系
@@ -116,11 +116,11 @@ vector<vector<float>> LidarSensor::ObsDetectByAngle(const port::CommonPose& sens
     one_obs_y = one_obs.second;
     for (int i = 0; i < one_obs_x.size(); i++) {
       //全局转局部
-      port::CommonPose point_pose(one_obs_x[i], one_obs_y[i], 0.Of);
+      port::CommonPose point_pose(one_obs_x[i], one_obs_y[i], 0.0f);
       auto local_pose = mathTools::Global2Rob(sensor_pose, point_pose);
       //过滤传感器范围外的点
-      if (local_pose.x > vehicle::front_vision_boundary[2][0] || local_pose.x < vehicle::back_vision_boundary[l][0] ||
-          local_pose.y > vehicle::left_vision_boundary[2][1] || local_pose.y < vehicle::right_vision_boundary[l][1]) {
+      if (local_pose.x > vehicle::front_vision_boundary[2][0] || local_pose.x < vehicle::back_vision_boundary[1][0] ||
+          local_pose.y > vehicle::left_vision_boundary[2][1] || local_pose.y < vehicle::right_vision_boundary[1][1]) {
         continue;
       }
       port::vec2f point(local_pose.x, local_pose.y);
@@ -146,12 +146,12 @@ vector<vector<float>> LidarSensor::ObsDetectByAngle(const port::CommonPose& sens
   /***计算各角度区间内最近的障碍物点***/
   vector<float> x_arr, y_arr;
   //分组遍历(每组内选出一个最近点)
-  for (int i = 0; 1 < sector_num_; 1 ++) {
+  for (int i = 0; i < sector_num_; i++) {
     if (subgroup[i].empty()) continue;
-    float min_dis = 100.0;  //-个超过传感器测量范围的值
+    float min_dis = 100.0;  //一个超过传感器测量范围的值
     port::SamplePoint sub_sample_point;
-    sub_sample_point.pose « 0.f, 0.f;
-    //急找组内囊近点
+    sub_sample_point.pose << 0.f, 0.f;
+    //寻找组内最近点
     for (auto subgroup_point : subgroup[i]) {
       //过滤大于采样距离外的点,且角度区间内只保留最近点
       if (subgroup_point.polar_dis < min_dis) {
@@ -161,7 +161,7 @@ vector<vector<float>> LidarSensor::ObsDetectByAngle(const port::CommonPose& sens
     }
     // 过滤空值
     if (sub_sample_point.pose.norm() > 0.f) {
-      x_arr.push_back(sub_sample_poiht.pose(0));
+      x_arr.push_back(sub_sample_point.pose(0));
       y_arr.push_back(sub_sample_point.pose(1));
     }
   }
@@ -185,7 +185,7 @@ vector<Eigen::Vector2f> LidarSensor::UpdateAiSensor(const port::CommonPose& robo
     polygon_points[0].push_back(cv::Point2f(point[0], point[1]));
   }
   for (auto point : vehicle::left_vision_boundary) {
-    polygon_points[l].push_back(cv::Point2f(point[0], point[1]));
+    polygon_points[1].push_back(cv::Point2f(point[0], point[1]));
   }
   for (auto point : vehicle::right_vision_boundary) {
     polygon_points[2].push_back(cv::Point2f(point[0], point[1]));
@@ -195,7 +195,7 @@ vector<Eigen::Vector2f> LidarSensor::UpdateAiSensor(const port::CommonPose& robo
   }
   //传感器识别障碍物获取
   vector<float> obs_x, obs_y;
-  // auto detected__obs = ObsDetectByAngle(robot_pose, env_obs);
+  // auto detected_obs = ObsDetectByAngle(robot_pose, env_obs);
   // TODO:测试Lidar射线数据
   auto detected_obs = ObsDetectByReflect(robot_pose, env_obs);
   obs_x = detected_obs[0];
@@ -211,7 +211,7 @@ vector<Eigen::Vector2f> LidarSensor::UpdateAiSensor(const port::CommonPose& robo
       if (result > 0) {
         //虚拟ai障碍物点转局部坐标系
         Eigen::Vector2f temp_ai_point;
-        temp_ai_point(0) = one_jpoint.x;
+        temp_ai_point(0) = one_point.x;
         temp_ai_point(1) = one_point.y;
         sim_ai_obs.push_back(temp_ai_point);
       }

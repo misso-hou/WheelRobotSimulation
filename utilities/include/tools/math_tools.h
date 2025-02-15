@@ -46,7 +46,7 @@ inline std::vector<float> linspace(float start, float end, int num) {
 }
 
 //函数生成网格坐标
-inline pair<mesh2D, mesh2D> meshgrid(const std::evector<float>& Aa, const std::vector<float> Ba) {
+inline pair<mesh2D, mesh2D> meshgrid(const std::vector<float>& Aa, const std::vector<float> Ba) {
   size_t m = Aa.size();
   size_t n = Ba.size();
 
@@ -84,7 +84,7 @@ inline mesh2D computeZ(const std::vector<std::vector<float>>& X, const std::vect
 /**
  * @brief:功能描述：全局坐标系转机器人坐标系
  * @param
- *   cur pose:机器人当前位姿
+ *   cur_pose:机器人当前位姿
  *   point:全局坐标系点坐标
  * @return:
  *   temp:机体坐标系点坐标
@@ -100,7 +100,7 @@ inline port::CommonPose Global2Rob(const port::CommonPose& cur_pose, const port:
 
 /**
  * @brief:功能描述：机器人坐标系转全局坐标系
- * @paran:
+ * @param:
  *   cur_pose:机器人当前位姿
  *   point:机器人坐标系点坐标
  * @return:
@@ -258,7 +258,7 @@ inline Eigen::MatrixXf CvMatToEigenMatrix(const cv::Mat& cv_mat) {
   int cols = cv_mat.cols;
   Eigen::MatrixXf eigen_matrix(rows, cols);
   for (int i = 0; i < rows; ++i) {
-    const unsigned char* rowPtr = cc_mat.ptr<unsigned char>(i);
+    const unsigned char* rowPtr = cv_mat.ptr<unsigned char>(i);
     for (int j = 0; j < cols; ++j) {
       eigen_matrix(i, j) = static_cast<float>(rowPtr[j]);
     }

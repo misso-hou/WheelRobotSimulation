@@ -31,15 +31,7 @@ function Format {
     CURRENT_DIR=$(pwd)
     echo "Current path is: $CURRENT_DIR"
     cd "$CURRENT_DIR/.."
-    find . -name "*.cpp" -or -name "*.h" | xargs clang-format -i -style=file #整个项目格式化
-    # find src -name "*.cpp" | xargs clang-format -i -style=file
-    # find modules/sensor/src -name "*.cpp" | xargs clang-format -i -style=file
-    # find modules/planning/src -name "*.cpp" | xargs clang-format -i -style=file 
-    # find modules/logger/src -name "*.cpp" | xargs clang-format -i -style=file
-    # find modules/gridmap/src -name "*.cpp" | xargs clang-format -i -style=file
-    # find modules/datacenter/src -name "*.cpp" | xargs clang-format -i -style=file
-    # find modules/control/src -name "*.cpp" | xargs clang-format -i -style=file
-    # find modules/animation/src -name "*.cpp" | xargs clang-format -i -style=file
+    find . -name "*.cpp" -or -name "*.h" -or -name "*.hpp" | xargs clang-format -i -style=file  #整个项目格式化
 }
 
 

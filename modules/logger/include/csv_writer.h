@@ -44,12 +44,9 @@ class CSVWandR {
   }
 
   /*写入csv文件数据*/
-  void CSVwriter(string file_name, float a, float b, float c = 0.0f, float d = 0.0f, float e = 0.0f, float f = 0.0f, float g = 0.0f, float h = 0.0f,
-                 float i = 0.0f, float j = 0.0f, float k = 0.0f, float l = 0.0f, float m = 0.0f);
-
-  void RecordWithTime(string file_name, float a, float b, float c = 0.0f, float d = 0.0f, float e = 0.0f, float f = 0.0f, float g = 0.0f,
-                      float h = 0.0f, float i = 0.0f, float j = 0.0f, float k = 0.0f, float l = 0.0f, float m = 0.0f, float n = 0.0f, float o = 0.0f);
-
+  void CSVwriter(string file_name, const vector<float>& data);
+  /*记录带有时间戳的数据*/
+  void RecordWithTime(string file_name, const vector<float>& data);
   /*按行写入数据*/
   void CSVwriteRow(string file_name, const vector<float>& data_in_row);
 };

@@ -4,6 +4,10 @@ ColumnLimit: 150
 
 Language: Cpp
 #格式设置
+# 允许格式化 Objective-C 代码
+ObjCBlockIndentWidth: 4
+ObjCSpaceAfterProperty: true
+ObjCSpaceBeforeProtocolList: true
 
 PointerAlignment: Left #指针符号在变量名的左边
 

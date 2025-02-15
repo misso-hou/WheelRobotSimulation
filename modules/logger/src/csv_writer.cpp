@@ -32,14 +32,18 @@ void CSVWandR::CSVcreate(string file_name) {
  * @brief: 在csv文件中按行写入固定个数数据
  * @params:
  *	  file_name:文件名
- *    a,b,c,d,e,f,g,h,i,g,h,i,j,k: CSV文件行元素
+ *    data:数据记录
  */
-void CSVWandR::CSVwriter(string file_name, float a, float b, float c, float d, float e, float f, float g, float h, float i, float j, float k, float l,
-                         float m) {
+void CSVWandR::CSVwriter(string file_name, const vector<float>& data) {
   csvfile_.open(file_name, ios::app);  // 以追加的形式打开csv文件
   // 数据保存到小数点后三位
-  csvfile_ << fixed << setprecision(3) << a << ',' << b << ',' << c << ',' << d << ',' << e << ',' << f << ',' << g << ',' << h << ',' << i << ','
-           << j << ',' << k << ',' << l << ',' << m << endl;
+  for (size_t i = 0; i < data.size(); ++i) {
+    csvfile_ << fixed << setprecision(3) << data[i];
+    if (i < data.size() - 1) {
+      csvfile_ << ",";
+    }
+  }
+  csvfile_ << "\n";
   csvfile_.close();
   return;
 }
@@ -68,12 +72,16 @@ void CSVWandR::CSVwriteRow(string file_name, const vector<float>& data_in_row) {
 /*
  * @breif:带有时间戳的数据
  */
-void CSVWandR::RecordWithTime(string file_name, float a, float b, float c, float d, float e, float f, float g, float h, float i, float j, float k,
-                              float l, float m, float n, float o) {
+void CSVWandR::RecordWithTime(string file_name, const vector<float>& data) {
   csvfile_.open(file_name, ios::app);  // 以追加的形式打开csv文件
   // 数据保存到小数点后三位
-  csvfile_ << fixed << setprecision(3) << a << ',' << b << ',' << c << ',' << d << ',' << e << ',' << f << ',' << g << ',' << h << ',' << i << ','
-           << j << ',' << k << ',' << l << ',' << m << ',' << n << ',' << o << ',' << endl;
+  for (size_t i = 0; i < data.size(); ++i) {
+    csvfile_ << fixed << setprecision(3) << data[i];
+    if (i < data.size() - 1) {
+      csvfile_ << ",";
+    }
+  }
+  csvfile_ << "\n";
   /*时间戳记录*/
   time_t now = time(NULL);
   struct tm* tm_now = localtime(&now);
