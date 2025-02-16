@@ -57,16 +57,3 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/modules/s
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/modules/control/include)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/modules/planning/include)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/modules/gridmap/include)
-
-# Manually specify the path to the Python3 executable (replace with your actual path)
-set(PYTHON_EXECUTABLE "/usr/bin/python3.8")
-# Manually specify the include directories for Python3
-set(PYTHON_INCLUDE_DIRS "/usr/include/python3.8")
-# Manually specify the link directories for Python3 (replace with your actual path)
-set(PYTHON_LIBRARY_DIRS "/usr/lib/python3.8/config-3.8-x86_64-linux-gnu;/usr/lib")
-# Manually specify the Python3 libraries to link against
-set(PYTHON_LIBRARIES "/usr/lib/x86_64-linux-gnu/libpython3.8.so")
-# Include Python3 headers
-include_directories(${PYTHON_INCLUDE_DIRS})
-# Link against Python3 libraries
-target_link_libraries(${PROJECT_NAME} ${PYTHON_LIBRARIES})

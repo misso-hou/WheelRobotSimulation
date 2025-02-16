@@ -22,7 +22,7 @@ tuple<matXf, matXf, matXf> Bycicle::TrackingErrorSS(const float& v_ref, const fl
    * lte_dot~=v_r(theta_e-theta_er)=v_r*theta_e
    * theta_e_dot~=v_r*K-v_r*tan(delta_r)/L-(v_r/L)*d(tan(delta))/d(delta)*(delta-delta_r)
    *             =v_r*K-v_r*tan(delta_r)/L-(v_r/L)*1/cos(delta_r)**2*(delta-delta_r)   note:delta_r=arctan(L*K)
-   *             =v_r/L*(delta-delta_r)/cos(delta_r)**2      
+   *             =v_r/L*(delta-delta_r)/cos(delta_r)**2
    */
   matXf A = matXf::Zero(2, 2);
   A(0, 1) = v_ref;

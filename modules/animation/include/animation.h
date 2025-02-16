@@ -10,9 +10,8 @@
 #include <vector>
 
 #include "common_port/data_port.h"
+#include "facilities/base_time_struct.h"
 #include "facilities/singleton.h"
-
-#include "facilities/base_time_struct. h"
 
 namespace py = pybind11;
 namespace mpl = matplotlibcpp17;
@@ -140,8 +139,6 @@ class Animation : public utilities::Singleton<Animation> {
   bool blade_;
   bool axis_change_;
   bool erase_flag_;
-  // vector<port: :CommonPose> mpc_horizon_; //todo:数据回放也需要显示
-  //动态系统	//todo：动态系统相关数据也需要显示
 };
 }  // namespace animation
 }  // namespace modules

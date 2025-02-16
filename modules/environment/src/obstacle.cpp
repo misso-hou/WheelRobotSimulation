@@ -226,7 +226,7 @@ void Obstacle::CoutourObsUpdate() {
 }
 
 void Obstacle::GenerateEllisoidObs() {
-  // use a linespace to have a full rotation angle betweent [-pi, pi]
+  // use a linespace to have a full rotation angle between [-pi, pi]
   vector<float> alpha = mathTools::linspace(-M_PI, M_PI, points_num_);
   Eigen::MatrixXf obs_points(points_num_, 2);
   //椭圆形轮廓点集
@@ -313,5 +313,4 @@ void Obstacle::ObsUpdate() {
 }
 
 }  // namespace env
-}  // namespace modules
 }  // namespace modules

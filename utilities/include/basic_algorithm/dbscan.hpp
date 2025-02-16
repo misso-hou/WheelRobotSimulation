@@ -18,7 +18,6 @@ namespace utilities {
 namespace basicAlg {
 
 class DBSCAN {
-
  public:
   DBSCAN() {}
   DBSCAN(unsigned int minPts, float eps, vector<port::ClusterPoint> points) {
@@ -30,7 +29,7 @@ class DBSCAN {
   ~DBSCAN() {}
 
  public:
-  pair<vector<port::ClusterPoint>, int> dbscanFit(unsigned int minPts, float eps, vector<Eigen::Vector2f> &points) {
+  pair<vector<port::ClusterPoint>, int> dbscanFit(unsigned int minPts, float eps, vector<Eigen::Vector2f>& points) {
     // 参数设置
     dataSetFunc(minPts, eps, points);
     // 运算
@@ -49,7 +48,7 @@ class DBSCAN {
   }
 
  private:
-  void dataSetFunc(unsigned int minPts, float eps, vector<Eigen::Vector2f> &points) {
+  void dataSetFunc(unsigned int minPts, float eps, vector<Eigen::Vector2f>& points) {
     m_minPoints = minPts;
     m_epsilon = eps;
     m_pointSize = points.size();
@@ -63,10 +62,10 @@ class DBSCAN {
     }
   }
 
-  int expandCluster(port::ClusterPoint point, int &clusterID, bool &add_flag) {
+  int expandCluster(port::ClusterPoint point, int& clusterID, bool& add_flag) {
     // 计算核心点附近范围内点
     vector<int> clusterSeeds = calculateCluster(point);
-    // 核心点聚类不满足最小点数限
+    // 核心点聚类不满足最小点数限制
     if (clusterSeeds.size() < m_minPoints) {
       point.clusterID = DBSCAN_NOISE;
       return DBSCAN_FAILURE;
@@ -86,8 +85,10 @@ class DBSCAN {
         ++index;
       }
       clusterSeeds.erase(clusterSeeds.begin() + indexCorePoint);
+
       for (vector<int>::size_type i = 0, n = clusterSeeds.size(); i < n; ++i) {
         vector<int> clusterNeighors = calculateCluster(m_points.at(clusterSeeds[i]));
+
         if (clusterNeighors.size() >= m_minPoints) {
           vector<int>::iterator iterNeighors;
           for (iterNeighors = clusterNeighors.begin(); iterNeighors != clusterNeighors.end(); ++iterNeighors) {
@@ -101,6 +102,7 @@ class DBSCAN {
           }
         }
       }
+
       return DBSCAN_SUCCESS;
     }
   }
@@ -118,12 +120,13 @@ class DBSCAN {
     return clusterIndex;
   }
 
-  inline float calculateDistance(const port::ClusterPoint &pointCore, const port::ClusterPoint &pointTarget) {
+  inline float calculateDistance(const port::ClusterPoint& pointCore, const port::ClusterPoint& pointTarget) {
     return pow(pointCore.pose(0) - pointTarget.pose(0), 2) + pow(pointCore.pose(1) - pointTarget.pose(1), 2);
   }
 
   pair<vector<port::ClusterPoint>, int> GetResult() { return make_pair(m_points, cluster_num_); }
-  int GetTotalPointSize() { return m_pointSize; }
+
+  int getTotalPointSize() { return m_pointSize; }
 
   int getMinimumClusterSize() { return m_minPoints; }
 
@@ -136,7 +139,8 @@ class DBSCAN {
   unsigned int m_pointSize;
   unsigned int m_minPoints;
   float m_epsilon;
-  int cluater_num_;  //聚类个数（与cluster ID对应)
+  int cluster_num_;  //聚类个数（与cluster ID对应)
 };
+
 }  // namespace basicAlg
 }  // namespace utilities

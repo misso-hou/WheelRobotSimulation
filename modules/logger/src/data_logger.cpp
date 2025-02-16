@@ -95,7 +95,7 @@ void Logger::TrackingDataRecord() {
                         error_,  //记录时间戳(主线程频率50HZ)和误差
                         linear_speed_,
                         angular_speed_,  //记录速度
-                        target_pose_.x,   //记录跟踪目标点
+                        target_pose_.x,  //记录跟踪目标点
                         target_pose_.y,
                         path_recorder_count_,
                         observe_v_,  //反馈速度记录

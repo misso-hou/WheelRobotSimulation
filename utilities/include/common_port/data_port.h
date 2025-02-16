@@ -76,7 +76,7 @@ struct TaskThd {
 //规划任务场景
 typedef enum {
   COVERCUT,  //弓字
-  P2P,       //p2p
+  P2P,       // p2p
   SIDE       //沿边
 } PlanType;
 
@@ -104,7 +104,7 @@ struct Twist {
 };
 
 /*速度控制模式（优先级逐渐提高)*/
-typedef enum { NORMAL, SLOWDOWN, SLOWUP_LEVEL1, SLOWUP_LEVEL2, SLOWDOWN_LEVEL1, SLOWDOWN_LEVEL2, SHUTDWON } ActionState;
+typedef enum { NORMAL, SLOWDOWN, SLOWUP_LEVEL1, SLOWUP_LEVEL2, SLOWDOWN_LEVEL1, SLOWDOWN_LEVEL2, SHUTDOWN } ActionState;
 
 /*车辆控制物理参数*/
 struct ControlParam {
@@ -204,7 +204,7 @@ typedef struct {
 } ClusterPoint;
 
 /*********算法数据类型定义***********/
-                                        //角度分区采样点
+//角度分区采样点
 struct SamplePoint {
   vec2f pose;       //位置
   float polar_dis;  //极作弊半径

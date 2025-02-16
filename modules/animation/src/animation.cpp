@@ -39,14 +39,38 @@ const int DURATION = 100;
 
 DataCenter* DC_Instance = DataCenter::GetInstance();
 
+// canvas and flush events
+auto canvas_update_flush_events = [](pybind11::object figure) {
+  pybind11::object canvas_attr = figure.attr("canvas");
+  pybind11::object canvas_update_attr = canvas_attr.attr("update");
+  pybind11::object canvas_flush_events_attr = canvas_update_attr.attr("flush_events");
+  pybind11::object ret01 = canvas_update_attr();
+  pybind11::object ret02 = canvas_flush_events_attr();
+};
+
+// canvas_copy_from_bbox
+auto canvas_copy_from_bbox = [](pybind11::object figure) -> pybind11::object {
+  pybind11::object canvas_attr = figure.attr("canvas");
+  pybind11::object canvas_copy_from_bbox_attr = canvas_attr.attr("copy_from_bbox");
+  pybind11::object fig_bbox = figure.attr("bbox");
+  pybind11::object ret = canvas_copy_from_bbox_attr(fig_bbox);
+};
+
+// canvas_restore_region
+auto canvas_restore_region = [](pybind11::object figure, pybind11::object bg) {
+  pybind11::object canvas_attr = figure.attr("canvas");
+  pybind11::object canvas_restore_region_attr = canvas_attr.attr("restore_region");
+  canvas_restore_region_attr(bg);
+};
+
 void Animation::EnvPltInit(int ratio, const pybind11::dict& fig_kwargs, const port::CommonPose& robot_pose) {
   FIGURE_INIT(env, fig_kwargs, Kwargs());
-  env_axes_ptr_->set_axis_off();
+  env_axes_ptr_->unwrap().attr("set_axis_off")();
   int pose_bias = 2;
   env_axes_ptr_->set_xlim(Args(robot_pose.x - ratio * pose_bias, robot_pose.x + ratio * pose_bias));
   env_axes_ptr_->set_ylim(Args(robot_pose.y - pose_bias, robot_pose.y + pose_bias));
   env_plt_.pause(Args(0.1));
-  env_base_background_ = env_figure_ptr_->canvas_copy_from_bbox().unwrap();
+  env_base_background_ = canvas_copy_from_bbox(env_figure_ptr_->unwrap());
   env_background_ = env_base_background_;
   // 颜色映射
   auto mpl_cm = pybind11::module::import("matplotlib.cm");
@@ -56,11 +80,11 @@ void Animation::EnvPltInit(int ratio, const pybind11::dict& fig_kwargs, const po
 void Animation::CmdPltInit(const pybind11::dict& fig_kwargs, const float& x_axis_range) {
   FIGURE_INIT(cmd, fig_kwargs, Kwargs("facecolor"_a = "lightsalmon"));
   cmd_plt_.grid(Args(true), Kwargs("linestyle"_a = "--", "linewidth"_a = 0.5, "color"_a = "black", "alpha"_a = 0.5));
-  // cmd_axes_ptr_->set_axis_off();
+  // cmd_axes_ptr_->unwrap().attr("set_axis_off")();
   cmd_axes_ptr_->set_xlim(Args(-0.3f, x_axis_range));
   cmd_axes_ptr_->set_ylim(Args(-1.5f, 2.5f));
   cmd_plt_.pause(Args(0.1));
-  cmd_background_ = cmd_figure_ptr_->canvas_copy_from_bbox().unwrap();
+  cmd_background_ = canvas_copy_from_bbox(cmd_figure_ptr_->unwrap());
 }
 
 void Animation::MapPltInit(const pybind11::dict& fig_kwargs, int ratio, const port::CommonPose& robot_pose) {
@@ -90,7 +114,8 @@ void Animation::MapPltInit(const pybind11::dict& fig_kwargs, int ratio, const po
                                                             py::format_descriptor<uint8_t>::format(),  // Data type
                                                             3,                                         // Number of dimenstions
                                                             shape,                                     // shape
-                                                            strides));                                 // strides
+                                                            strides                                    // strides
+                                                            ));
 
   // figure初始化
   map_plt_ = mpl::pyplot::import();
@@ -100,23 +125,23 @@ void Animation::MapPltInit(const pybind11::dict& fig_kwargs, int ratio, const po
   map_axes_ptr_ = make_shared<mpl::axes::Axes>(axes_obj);
   // 背景设置
   map_plt_.show(Args(), Kwargs("block"_a = 0));
-  map_axes_ptr_->set_axis_off();
+  map_axes_ptr_->unwrap().attr("set_axis_off")();
   map_axes_ptr_->imshow(Args(np_image), Kwargs("interpolation"_a = "bilinear", "origin"_a = "lower")).unwrap();
   int local_bias = 10;
   map_axes_ptr_->set_xlim(Args(robot_pose.x / MAP_RESOLUTION - local_bias * ratio, robot_pose.x / MAP_RESOLUTION + local_bias * ratio));
   map_axes_ptr_->set_ylim(Args(robot_pose.y / MAP_RESOLUTION - local_bias, robot_pose.y / MAP_RESOLUTION + local_bias));
   map_plt_.pause(Args(0.1));
-  map_background_ = map_figure_ptr_->canvas_copy_from_bbox().unwrap();
+  map_background_ = canvas_copy_from_bbox(map_figure_ptr_->unwrap());
   map_init_flag_ = true;
 }
 
 void Animation::SensorPltInit(const pybind11::dict& fig_kwargs, const float& offset) {
   FIGURE_INIT(sensor, fig_kwargs, Kwargs());
-  sensor_axes_ptr_->set_axis_off();
+  sensor_axes_ptr_->unwrap().attr("set_axis_off")();
   sensor_axes_ptr_->set_xlim(Args(-1 * offset, offset));
   sensor_axes_ptr_->set_ylim(Args(-1 * offset, offset));
   sensor_plt_.pause(Args(0.1));
-  sensor_background_ = sensor_figure_ptr_->canvas_copy_from_bbox().unwrap();
+  sensor_background_ = canvas_copy_from_bbox(sensor_figure_ptr_->unwrap());
 }
 
 void Animation::SpacePltInit(const pybind11::dict& fig_kwargs) {
@@ -133,7 +158,7 @@ void Animation::SpacePltInit(const pybind11::dict& fig_kwargs) {
   space_axes_ptr_->unwrap().attr("view_init")(30, -80);
   space_axes_ptr_->unwrap().attr("set_box_aspect")(py::make_tuple(1.3, 0.94, 0.5));
   space_plt_.pause(Args(0.1));
-  space_background_ = space_figure_ptr_->canvas_copy_from_bbox().unwrap();
+  space_background_ = canvas_copy_from_bbox(space_figure_ptr_->unwrap());
 }
 
 void Animation::InitializePlt(const port::CommonPose& robot_pose, const Mode& mode) {
@@ -245,8 +270,8 @@ void Animation::PlotPointsOnPath() {
     points_artist = env_axes_ptr_->plot(Args(points[0], points[1]), kwargs).unwrap().cast<py::list>()[0];
   }
   /*step03->artist实时数据更新并绘制*/
-  env_axes_ptr_->set_line_data(points_artist, Args(points[0], points[1]));
-  env_axes_ptr_->draw_artist(Args(points_artist));
+  points_artist.attr("set_data")(points[0],points[1]);
+  env_axes_ptr_->unwrap().attr("draw_artist")(points_artist);
 }
 
 /*
@@ -254,7 +279,7 @@ void Animation::PlotPointsOnPath() {
  *@params:
  *    points:polygon边界点
  *    color:颜色设置
- *    alpha：透明度
+ *    alpha:透明度
  */
 py::object Animation::DefinePoly(const vector<vector<float>>& points, string color, float alpha) {
   auto poly = py::array(py::cast(std::move(points)));
@@ -297,12 +322,12 @@ void Animation::Plotline() {
     }
     // 显示路径方向信息
     pybind11::dict Kwargs("color"_a = "coral", "scale"_a = 30, "units"_a = "width", "animated"_a = true, "width"_a = 0.002f, "headwidth"_a = 2,
-                          "headlength"_a = 4, "alpha" j_a = 1);
+                          "headlength"_a = 4, "alpha"_a = 1);
     vector_artist = env_axes_ptr_->quiver(Args(0.f, 0.f, 1.f, 1.f), Kwargs).unwrap();
     /*step03->artist实时数据更新并绘制*/
     for (int j = 0; j < lines_artist.size(); j++) {
-      env_axes_ptr_->set_line_data(lines_artist[j], Args(lines[j][0], lines[j][1]));
-      env_axes_ptr_->draw_artist(Args(lines_artist[j]));
+      lines_artist[j].attr("set_data")(lines[j][0], lines[j][1]);
+      env_axes_ptr_->unwrap().attr("draw_artist")(lines_artist[j]);
     }
     //路径方向(起点)
     if (!lines[0].empty() && lines[0][0].size() > 2) {
@@ -313,7 +338,7 @@ void Animation::Plotline() {
       u = {path_dir_norm[0]};
       v = {path_dir_norm[1]};
       vector_artist.attr("set_UVC")(u, v);
-      env_axes_ptr_->draw_artist(Args(vector_artist));
+      env_axes_ptr_->unwrap().attr("draw_artist")(vector_artist);
     }
   }
 }
@@ -360,7 +385,7 @@ void Animation::PlotRobotOutline(const Scene& scene) {
     auto outline = scene == Scene::ENV ? env_outlines[j] : sensor_outlines[j];
     outline.attr("set_xy")(outline_array);
     auto axes_ptr = scene == Scene::ENV ? env_axes_ptr_ : sensor_axes_ptr_;
-    axes_ptr->draw_artist(Args(outline));
+    axes_ptr->unwrap().attr("draw_artist")(outline);
   }
   // 外轮廓加深
   vector<float> x_array, y_array;
@@ -369,8 +394,8 @@ void Animation::PlotRobotOutline(const Scene& scene) {
     y_array.push_back(point[1]);
   }
   // if (scene == Scene::ENV) {
-  //   env_axes_ptr_->set_line_data(robot_boundary, Args(x_array, y_array));
-  //   env_axes_ptr_->draw_artist(Args(robot_boundary));
+  //   robot_boundary.attr("set_data")(x_array, y_array));
+  //   env_axes_ptr_->unwrap().attr("draw_artist")(robot_boundary);
   // }
 }
 
@@ -393,8 +418,8 @@ void Animation::PlotTargetOutline() {
     x_array.push_back(point[0]);
     y_array.push_back(point[1]);
   }
-  env_axes_ptr_->set_line_data(robot_boundary, Args(x_array, y_array));
-  env_axes_ptr_->draw_artist(Args(robot_boundary));
+  robot_boundary.attr("set_data")(x_array, y_array);
+  env_axes_ptr_->unwrap().attr("draw_artist")(robot_boundary);
 }
 
 void Animation::PlotVisionBoundary() {
@@ -420,9 +445,8 @@ void Animation::PlotVisionBoundary() {
   // 视觉窗口
   if (!vision_boundary.empty()) {
     for (int j = 0; j < vision_polygon.size(); j++) {
-      sensor_axes_ptr_->set_line_data(vision_polygon[j], Args(vision_boundary[j][0], vision_boundary[j][1]));
-      // vision_polygon[j].attr("set_data")(vision_boundary[j][0], vision_boundary[j][1]);
-      sensor_axes_ptr_->draw_artist(Args(vision_polygon[j]));
+      vision_polygon[j].attr("set_data")(vision_boundary[j][0], vision_boundary[j][1]);
+      sensor_axes_ptr_->unwrap().attr("draw_artist")(vision_polygon[j]);
     }
   }
 }
@@ -455,8 +479,8 @@ void Animation::PlotLidarData() {
     ray_y[0] = 0.0;
     ray_x[1] = lidar_data[0][i] - sync_pose_.x;
     ray_y[1] = lidar_data[1][i] - sync_pose_.y;
-    sensor_axes_ptr_->set_line_data(lidar_ray_artist[i], Args(ray_x, ray_y));
-    sensor_axes_ptr_->draw_artist(Args(lidar_ray_artist[i]));
+    lidar_ray_artist[i].attr("set_data")(ray_x, ray_y);
+    sensor_axes_ptr_->unwrap().attr("draw_artist")(lidar_ray_artist[i]);
   }
 }
 
@@ -478,8 +502,8 @@ void Animation::PlotGridMapObs() {
     map_obs_artist = sensor_axes_ptr_->plot(Args(map_points[0], map_points[1]), kwargs2).unwrap().cast<py::list>()[0];
   }
   /*step03->artist实时数据更新并绘制*/
-  sensor_axes_ptr_->set_line_data(map_obs_artist, Args(map_points[0], map_points[1]));
-  sensor_axes_ptr_->draw_artist(Args(map_obs_artist));
+  map_obs_artist.attr("set_data")(map_points[0], map_points[1]);
+  sensor_axes_ptr_->unwrap().attr("draw_artist")(map_obs_artist);
 }
 
 void Animation::PlotEntityObs(const Scene& scene) {
@@ -521,8 +545,8 @@ void Animation::PlotEntityObs(const Scene& scene) {
   auto obs_artist = scene == Scene::ENV ? env_obs_artist : sensor_obs_artist;
   auto local_axes_ptr_ = scene == Scene::ENV ? env_axes_ptr_ : sensor_axes_ptr_;
   for (uint i = 0; i < obs_num; i++) {
-    local_axes_ptr_->set_line_data(obs_artist[i], Args(orin_obs[i][0], orin_obs[i][1]));
-    local_axes_ptr_->draw_artist(Args(obs_artist[i]));
+    obs_artist[i].attr("set_data")(orin_obs[i][0], orin_obs[i][1]);
+    local_axes_ptr_->unwrap().attr("draw_artist")(obs_artist[i]);
   }
 }
 
@@ -557,8 +581,8 @@ void Animation::PlotSensorObs(const Scene& scene) {
   /*step03->artist实时数据更新并绘制*/
   py::object obs_artist = scene == Scene::ENV ? env_obs_artist : sensor_obs_artist;
   auto local_axes_ptr_ = scene == Scene::ENV ? env_axes_ptr_ : sensor_axes_ptr_;
-  local_axes_ptr_->set_line_data(obs_artist, Args(obs_x, obs_y));
-  local_axes_ptr_->draw_artist(Args(obs_artist));
+  obs_artist.attr("set_data")(obs_x, obs_y);
+  local_axes_ptr_->unwrap().attr("draw_artist")(obs_artist);
 }
 
 /**
@@ -578,12 +602,12 @@ void Animation::SetEnvAxisLimit(const mesh2D& traj, const int ratio, float offse
   /*********step01->计算x/y轴数据边界**********/
   // 原始axis边界
   auto axes_xlim = env_axes_ptr_->get_xlim();
-  auto axes_ylim = env_axes_ptr_->get_ylim();
+  pybind11::list axes_ylim = env_axes_ptr_->unwrap().attr("get_ylim")();
   float axis_min_x, axis_max_x, axis_min_y, axis_max_y;
   axis_min_x = get<0>(axes_xlim);
   axis_max_x = get<1>(axes_xlim);
-  axis_min_y = get<0>(axes_ylim);
-  axis_max_y = get<1>(axes_ylim);
+  axis_min_y = axes_ylim[0].cast<float>();
+  axis_max_y = axes_ylim[1].cast<float>();
   //计算外轮廓x轴方向极值
   float outline_min_x, outline_max_x, outline_min_y, outline_max_y;
   outline_min_x = outline_max_x = robot_pose_.x;
@@ -639,7 +663,7 @@ void Animation::SetEnvAxisLimit(const mesh2D& traj, const int ratio, float offse
   auto traj_max_y = *(std::max_element(traj[1].begin(), traj[1].end()));
   auto traj_min_y = *(std::min_element(traj[1].begin(), traj[1].end()));
 
-  /***********step02->x/y数据边界比较********/
+  /*********step02->x/y数据边界比较**********/
   float x_min_lim = min(axis_min_x, min(outline_min_x, min(obs_min_x, min(path_min_x, traj_min_x))));
   float x_max_lim = max(axis_max_x, max(outline_max_x, max(obs_max_x, max(path_max_x, traj_max_x))));
   float y_min_lim = min(axis_min_y, min(outline_min_y, min(obs_min_y, min(path_min_y, traj_min_y))));
@@ -703,8 +727,8 @@ void Animation::PlotMPCHrizon() {
     points_artist = env_axes_ptr_->plot(Args(points[0], points[1]), kwargs).unwrap().cast<py::list>()[0];
   }
   /*step03->artist实时数据更新并绘制*/
-  env_axes_ptr_->set_line_data(points_artist, Args(points[0], points[1]));
-  env_axes_ptr_->draw_artist(Args(points_artist));
+  points_artist.attr("set_data")(points[0],points[1]);
+  env_axes_ptr_->unwrap().attr("draw_artist")(points_artist);
 }
 
 void Animation::DynSysAvoidDisplay() {
@@ -753,10 +777,10 @@ void Animation::PlotAvoidAgents(const vector<port::CircleAgent>& avoid_agents) {
     centers[i] = avoid_agents[i].center_pose;
     // 虚拟边界
     virtual_boundary_artist[i].attr("set_center")(py::make_tuple(centers[i][0], centers[i][1]));
-    env_axes_ptr_->draw_artist(Args(virtual_boundary_artist[i]));
+    env_axes_ptr_->unwrap().attr("draw_artist")(virtual_boundary_artist[i]);
     // 安全膨胀边界
     safe_boundary_artist[i].attr("set_center")(py::make_tuple(centers[i][0], centers[i][1]));
-    env_axes_ptr_->draw_artist(Args(safe_boundary_artist[i]));
+    env_axes_ptr_->unwrap().attr("draw_artist")(safe_boundary_artist[i]);
   }
 }
 
@@ -786,7 +810,7 @@ void Animation::PlotAvoidAgentsConvex() {
   for (int i = 0; i < boundary_artist.size(); i++) {
     // 虚拟边界
     boundary_artist[i].attr("set_center")(py::make_tuple(centers[i][0], centers[i][1]));
-    env_axes_ptr_->draw_artist(Args(boundary_artist[i]));
+    env_axes_ptr_->unwrap().attr("draw_artist")(boundary_artist[i]);
   }
 }
 
@@ -854,8 +878,8 @@ void Animation::PlotObsSandCPoints() {
   /*step03->artist实时数据更新并绘制*/
   for (int j = 0; j < obs_points_artist.size(); j++) {
     // if(j > 1) continue;
-    env_axes_ptr_->set_line_data(obs_points_artist[j], Args(dispose_points[j][0], dispose_points[j][1]));
-    env_axes_ptr_->draw_artist(Args(obs_points_artist[j]));
+    obs_points_artist[j].attr("set_data")(dispose_points[j][0], dispose_points[j][1]);
+    env_axes_ptr_->unwrap().attr("draw_artist")(obs_points_artist[j]);
   }
 }
 
@@ -902,8 +926,8 @@ void Animation::PlotC1VirtualObs() {
     float color_ratio = 1.0f - ratio_dis;
     auto local_color = jet_cmap_(color_ratio);
     obs_points_artist[j].attr("set_color")(local_color);
-    env_axes_ptr_->set_line_data(obs_points_artist[j], Args(obs_points[j][0], obs_points[j][1]));
-    env_axes_ptr_->draw_artist(Args(obs_points_artist[j]));
+    obs_points_artist[j].attr("set_data")(obs_points[j][0], obs_points[j][1]);
+    env_axes_ptr_->unwrap().attr("draw_artist")(obs_points_artist[j]);
   }
 }
 
@@ -948,7 +972,7 @@ void Animation::PlotAgentVelVector(const port::CircleAgent& agent) {
     u = {plt_vel_vector[j][0]};
     v = {plt_vel_vector[j][1]};
     vel_vector_artist[j].attr("set_UVC")(u, v);
-    env_axes_ptr_->draw_artist(Args(vel_vector_artist[j]));
+    env_axes_ptr_->unwrap().attr("draw_artist")(vel_vector_artist[j]);
   }
 }
 
@@ -984,13 +1008,13 @@ void Animation::PlotAgentObsQuiver(const port::CircleAgent& agent) {
   vector<float> quiver_width = {0.004f, 0.002f, 0.006f};
   vector<int> scales = {10, 10, 10};
   for (int i = 0; i < obs_vector_artist.size(); i++) {
-    // if(i == 1) continue;
+    // if (i == 1) continue;
     pybind11::dict Kwargs("color"_a = quiver_colors[i], "scale"_a = scales[i], "units"_a = "width", "animated"_a = true, "width"_a = quiver_width[i],
                           "headwidth"_a = 3, "headlength"_a = 5);
     obs_vector_artist[i] =
         env_axes_ptr_->quiver(Args(vector_item_array[i][0], vector_item_array[i][1], vector_item_array[i][2], vector_item_array[i][3]), Kwargs)
             .unwrap();
-    env_axes_ptr_->draw_artist(Args(obs_vector_artist[i]));
+    env_axes_ptr_->unwrap().attr("draw_artist")(obs_vector_artist[i]);
   }
 }
 
@@ -1009,7 +1033,7 @@ void Animation::EnvironmentDisplay() {
     env_background_ = env_base_background_;
   }
   /*****图像元素绘制*****/
-  env_figure_ptr_->canvas_restore_region(env_background_);
+  canvas_restore_region(env_figure_ptr_->unwrap(), env_background_);
   Plotline();
   PlotPointsOnPath();
   PlotTargetOutline();
@@ -1022,13 +1046,12 @@ void Animation::EnvironmentDisplay() {
     DynSysAvoidDisplay();
   }
   SetEnvAxisLimit(trajectory_, 1, 2.f);
-  env_figure_ptr_->canvas_update();
-  env_figure_ptr_->canvas_flush_events();
+  canvas_update_flush_events(env_figure_ptr_->unwrap());
   // 背景更新
   if (!axis_change_ && blade_ && !erase_flag_) {
-    env_figure_ptr_->canvas_restore_region(env_background_);
+    canvas_restore_region(env_figure_ptr_->unwrap(),env_background_);
     // PlotBladeShadow(ax, robot_pose);
-    env_background_ = env_figure_ptr_->canvas_copy_from_bbox().unwrap();
+    env_background_ = canvas_copy_from_bbox(env_figure_ptr_->unwrap());
   } else {
     env_background_ = env_base_background_;
   }
@@ -1051,7 +1074,7 @@ void Animation::CmdMonitor(int buffer_length) {
     duration_time += record_time / 1000.f;
   }
   last_sim_time_stamp = current_time_stamp;
-  cmd_figure_ptr_->canvas_restore_region(cmd_background_);  // 绘制背景
+  canvas_restore_region(cmd_figure_ptr_->unwrap(), cmd_background_);
   /******数据计算******/
   /*step01->实时数据更新*/
   static vector<float> time_array;
@@ -1083,8 +1106,8 @@ void Animation::CmdMonitor(int buffer_length) {
   }
   /*step03->artist实时数据更新并绘制*/
   for (int j = 0; j < lines_artist.size(); j++) {
-    cmd_axes_ptr_->set_line_data(lines_artist[j], Args(time_array, line_data[j]));
-    cmd_axes_ptr_->draw_artist(Args(lines_artist[j]));
+    lines_artist[j].attr("set_data")(time_array, line_data[j]);
+    cmd_axes_ptr_->unwrap().attr("draw_artist")(lines_artist[j]);
   }
   /******axis计算******/
   auto axes_xlim = cmd_axes_ptr_->get_xlim();
@@ -1093,8 +1116,7 @@ void Animation::CmdMonitor(int buffer_length) {
     float x_max = x_min + CMD_X_RANGE;
     cmd_axes_ptr_->set_xlim(Args(x_min, x_max));
   }
-  cmd_figure_ptr_->canvas_update();
-  cmd_figure_ptr_->canvas_flush_events();
+  canvas_update_flush_events(cmd_figure_ptr_->unwrap());
 }
 
 void Animation::MapDisplay() {
@@ -1102,16 +1124,15 @@ void Animation::MapDisplay() {
   //频率控制
   static int64_t last_sim_time_stamp = 0;
   if (FrequencyCtrl(DURATION, last_sim_time_stamp)) return;
-  map_figure_ptr_->canvas_restore_region(map_background_);
-  map_figure_ptr_->canvas_update();
-  map_figure_ptr_->canvas_flush_events();
+  canvas_restore_region(map_figure_ptr_->unwrap(),map_background_);
+  canvas_update_flush_events(map_figure_ptr_->unwrap());
 }
 
 void Animation::ObsMonitor() {
   //频率控制
   static int64_t last_sim_time_stamp = 0;
   if (FrequencyCtrl(DURATION, last_sim_time_stamp)) return;
-  sensor_figure_ptr_->canvas_restore_region(sensor_background_);  // 绘制背景
+  canvas_restore_region(sensor_figure_ptr_->unwrap(), sensor_background_);
   PlotRobotOutline(Scene::SENSOR);
   PlotVisionBoundary();
   PlotSensorObs(Scene::SENSOR);
@@ -1120,8 +1141,7 @@ void Animation::ObsMonitor() {
     PlotLidarData();
     PlotEntityObs(Scene::SENSOR);
   }
-  sensor_figure_ptr_->canvas_update();
-  sensor_figure_ptr_->canvas_flush_events();
+  canvas_update_flush_events(sensor_figure_ptr_->unwrap());
 }
 
 void Animation::SpaceRobot(const float& rate) {
@@ -1170,18 +1190,17 @@ void Animation::SpaceRobot(const float& rate) {
     }
   }
   /*step03->动画更新*/
-  space_figure_ptr_->canvas_restore_region(space_background_);
+  canvas_restore_region(space_figure_ptr_->unwrap(),space_background_);
   // text数据
   text_artist.attr("set_text")(attitude);
-  space_axes_ptr_->draw_artist(Args(text_artist));
+  space_axes_ptr_->unwrap().attr("draw_artist")(text_artist);
   // contoours
   for (int i = 0; i < contourN; i++) {
     contours_artists[i].attr("set_data")(contours[i][0], contours[i][1]);
     contours_artists[i].attr("set_3d_properties")(contours[i][2]);
-    space_axes_ptr_->draw_artist(Args(contours_artists[i]));
+    space_axes_ptr_->unwrap().attr("draw_artist")(contours_artists[i]);
   }
-  space_figure_ptr_->canvas_update();
-  space_figure_ptr_->canvas_flush_events();
+  canvas_update_flush_events(space_figure_ptr_->unwrap());
 }
 
 /**
@@ -1196,12 +1215,12 @@ void Animation::SurfaceVelPlanning(int T) {
   /******动画频率设置******/
   static int64_t last_sim_time_stamp = 0;
   if (FrequencyCtrl(T, last_sim_time_stamp)) return;
-  /****figure 图框设置*****/
+  /*****figure图框设置*****/
   static auto plt = matplotlibcpp17::pyplot::import();
   matplotlibcpp17::mplot3d::import();
   static auto fig = plt.figure(Args(), Kwargs("figsize"_a = py::make_tuple(ratio * fig_width, fig_width), "dpi"_a = 100, "tight_layout"_a = true,
                                               "facecolor"_a = "lightgray"));
-  static auto ax = fig.add_subplot(Args(), Kwargs("projection"_ a = "3d"));
+  static auto ax = fig.add_subplot(Args(), Kwargs("projection"_a = "3d"));
   static py::object background;
   static bool once_flag = true;
   static py::object point_artist;
@@ -1215,12 +1234,13 @@ void Animation::SurfaceVelPlanning(int T) {
     auto y_array = mathTools::linspace(0.0, 1.0, 100);
     auto [X, Y] = mathTools::meshgrid(x_array, y_array);
     auto Z = mathTools::computeZ(X, Y);
-    // to numpy array(vector<vector> is converted to list of list)
+    // to numpy array (vector<vector> is converted to list of list)
     const auto X_ = py::array(py::cast(std::move(X)));
     const auto Y_ = py::array(py::cast(std::move(Y)));
     const auto Z_ = py::array(py::cast(std::move(Z)));
     const auto surf =
         ax.plot_surface(Args(X_, Y_, Z_), Kwargs("cmap"_a = cm::coolwarm, "edgecolor"_a = "k", "linewidth"_a = 1, "animated"_a = false));
+    
     //速度规划点
     pybind11::dict kwargs("c"_a = "lawngreen", "ls"_a = "None", "animated"_a = true, "marker"_a = "o", "markersize"_a = 10);
     point_artist = ax.plot(Args(V(0), V(1), V(2)), kwargs).unwrap().cast<py::list>()[0];
@@ -1229,16 +1249,15 @@ void Animation::SurfaceVelPlanning(int T) {
     ax.set_ylim(Args(0.0f, 1.0f));
     ax.set_zlim(Args(-0.01, 1.01));
     plt.pause(Args(0.1));
-    background = fig.canvas_copy_from_bbox().unwrap();
+    background = canvas_copy_from_bbox(fig.unwrap());
   }
   /*****图像元素绘制*****/
-  fig.canvas_restore_region(backgroud);
+  canvas_restore_region(fig.unwrap(), background);
   point_artist.attr("set_data")(V(0), V(1));
   point_artist.attr("set_3d_properties")(V(2));
-  ax.draw_artist(Args(point_artist));
+  ax.unwrap().attr("draw_artist")(point_artist);
   ax.grid(Args(true));
-  fig.cancas_update();
-  fig.canvas_flush_events();
+  canvas_update_flush_events(fig.unwrap());
 }
 
 void Animation::AnimationLoop() {

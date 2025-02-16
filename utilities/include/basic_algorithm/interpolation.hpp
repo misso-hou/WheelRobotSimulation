@@ -16,7 +16,7 @@ class InterpolateTools {
 
  public:
   /*******插值函数*********/
-  pair<vector<float>, vector<float>> LineInterpolate(const vector<float>& xs const vector<float>& ys, const float& ds) {
+  pair<vector<float>, vector<float>> LineInterpolate(const vector<float>& xs, const vector<float>& ys, const float& ds) {
     int points_num = xs.size();
     vector<float> ipl_x, ipl_y;
     for (int i = 0; i < points_num - 1; i++) {
@@ -37,7 +37,7 @@ class InterpolateTools {
         local_ys.push_back(ys[cur_id]);
       }
       ipl_x.insert(ipl_x.end(), local_xs.begin(), local_xs.end());
-      ipl_y.insert(ipl_y.end(), local_ys.begin() z local_ys.end());
+      ipl_y.insert(ipl_y.end(), local_ys.begin(), local_ys.end());
     }
     return make_pair(ipl_x, ipl_y);
   }
@@ -80,46 +80,52 @@ class InterpolateTools {
 
     float dx1, dx2, dy1, dy2;
 
-    dx1 = x[l] - x[0];
+    dx1 = x[1] - x[0];
     C[0] = 1.0 / dx1;
     B[0] = 2.0 * C[0];
     r[0] = 3 * (y[1] - y[0]) / (dx1 * dx1);
+
     for (int i = 1; i < n - 1; ++i) {
       dx1 = x[i] - x[i - 1];
       dx2 = x[i + 1] - x[i];
       A[i] = 1.0 / dx1;
       C[i] = 1.0 / dx2;
       B[i] = 2.0 * (A[i] + C[i]);
-      dy1 = y[i] - y[i - i];
+      dy1 = y[i] - y[i - 1];
       dy2 = y[i + 1] - y[i];
       r[i] = 3 * (dy1 / (dx1 * dx1) + dy2 / (dx2 * dx2));
     }
-    dxl = x[n - 1] - x[n - 2];
-    dyl = y[n - 1] - y[n - 2];
+
+    dx1 = x[n - 1] - x[n - 2];
+    dy1 = y[n - 1] - y[n - 2];
     A[n - 1] = 1.0 / dx1;
     B[n - 1] = 2.0 * A[n - 1];
-    r[n - 1] = 3 * (dyl / (dxl * dxl));
+    r[n - 1] = 3 * (dy1 / (dx1 * dx1));
+
     vector<float> cPrime(n);
     cPrime[0] = C[0] / B[0];
-    for (int i = 1; i < n; ++1) {
+    for (int i = 1; i < n; ++i) {
       cPrime[i] = C[i] / (B[i] - cPrime[i - 1] * A[i]);
     }
+
     vector<float> dPrime(n);
-    dPrime[O] = r[0] / B[0];
+    dPrime[0] = r[0] / B[0];
     for (int i = 1; i < n; ++i) {
-      dPrime[i] = (r[i] - dPrime[i ；1] * A[i]) / (B[i] - cPrime[i - 1] * A[i]);
+      dPrime[i] = (r[i] - dPrime[i - 1] * A[i]) / (B[i] - cPrime[i - 1] * A[i]);
     }
+
     vector<float> k(n);
     k[n - 1] = dPrime[n - 1];
-    for (int i = n - 2； i >= 0; --i) {
-      k[i] = dPrime[i] - cPrime[i] * k[i + i];
+    for (int i = n - 2; i >= 0; --i) {
+      k[i] = dPrime[i] - cPrime[i] * k[i + 1];
     }
     for (int i = 1; i < n; ++i) {
-      dxl = x[i] - x[i - 1];
-      dyl = y[i] - y[i - 1];
-      a[i - 1] = k[i - 1] * dxl - dyl;
-      b[i - 1] = -k[i] * dxl + dyl;
+      dx1 = x[i] - x[i - 1];
+      dy1 = y[i] - y[i - 1];
+      a[i - 1] = k[i - 1] * dx1 - dy1;
+      b[i - 1] = -k[i] * dx1 + dy1;
     }
+
     return make_pair(a, b);
   }
 
@@ -133,13 +139,16 @@ class InterpolateTools {
           break;
         }
       }
+
       float dx = xOrig[j + 1] - xOrig[j];
       float t = (xInterp[i] - xOrig[j]) / dx;
       float y = (1 - t) * yOrig[j] + t * yOrig[j + 1] + t * (1 - t) * (a[j] * (1 - t) + b[j] * t);
       yInterp[i] = y;
     }
+
     return yInterp;
   }
 };
+
 }  // namespace basicAlg
 }  // namespace utilities

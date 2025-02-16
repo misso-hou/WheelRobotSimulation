@@ -4,7 +4,7 @@ project(vehicle)
 find_package(Eigen3 REQUIRED)
 
 #建立子库
-file(GLOB SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/* .cpp) 
+file(GLOB SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp) 
 add_library(${PROJECT_NAME} STATIC ${SRC_FILES})
 
 #链接自身头文件
