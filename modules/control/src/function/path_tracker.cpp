@@ -102,7 +102,86 @@ bool PathTracker::ArrivedCheck(bool overtime_check, int dis_gain) {
  *   accuracy_gain:到达精度
  *@return 角速度
  */
-bool PathTracker::PathDirAlign(bool approach_switch, const float& accuracy_gain) {}
+bool PathTracker::PathDirAlign(bool approach_switch, const float& accuracy_gain) {
+  static bool local_first_flag = true;
+  //如果已经完成路径起点对正,直接退出函数
+  if (path_align_) {
+    local_first_flag = true;
+    return path_align_;
+  }
+  float angular = 0, linear = 0;
+  //到达路径起点附近,并对正方向后再跟踪
+  port::CommonPose goal = path_[0];
+  float goal_angle = 0, angle_diff = 0;
+  float goal_dist = mathTools::PointsDis(goal, base::k_robot_pose_);
+  // 情况一:先到起点再对正方向
+  if (approach_switch) {
+    // 01->路径起点跟踪异常
+    if (local_first_flag) {
+      local_first_flag = false;
+      goal.theta = mathTools::PointsAngle(goal, base::k_robot_pose_);
+    }
+    goal.theta = mathTools::PointsAngle(goal, base::k_robot_pose_);
+    port::CommonPose pose_ref_end = mathTools::Global2Rob(goal, base::k_robot_pose_);
+    if (pose_ref_end.x > 0.2f || fabs(pose_ref_end.y) > 1.0f) {
+      approach_ = true;
+    }
+    // 02->靠近路径
+    if (goal_dist > accuracy_gain * base::k_ct_.arrival_accuracy_thd && !approach_) {
+      goal_angle = mathTools::PointsAngle(goal, base::k_robot_pose_) - base::k_robot_pose_.theta;
+      if (base::k_task_.ref_cmd.linear >= 0) {
+        goal.theta = mathTools::PointsAngle(goal_angle);
+      } else {
+        goal.theta = mathTools::PointsAngle(goal_angle + M_PI);
+      }
+      angular = goal_angle;
+      if (goal_dist > 2) {
+        linear = 2.0f;
+      } else {
+        linear = 0.3f;
+      }
+      if (fabs(goal_angle) > M_PI / 6) linear = 0.0f;
+    }
+    // 03->到达路径起点,对正路径
+    approach_ = true;
+    goal_angle = mathTools::PointsAngle(path_[1], path_[0]);
+    if (base::k_task_.ref_cmd.linear >= 0) {
+      angle_diff = mathTools::NormalizeAngle(goal_angle - base::k_robot_pose_.theta);
+    } else {
+      angle_diff = mathTools::NormalizeAngle(goal_angle - base::k_robot_pose_.theta + M_PI);
+    }
+    linear = 0.0f;
+    // 对准路径起点方向判断
+    if (approach_) {
+      if (fabs(angle_diff) > accuracy_gain * mathTools::DegToRad(base::k_ct_.angle_align_thd) + 0.1f) {
+        angular = angle_diff;
+      } else {
+        approach_ = false;
+        path_align_ = true;
+      }
+    }
+  }
+  // 情况二:无需到达起点附近，只对正方向
+  else {
+    goal_angle = mathTools::PointsAngle(path_[1], path_[0]);
+    if (base::k_task_.ref_cmd.linear >= 0) {
+      angle_diff = mathTools::NormalizeAngle(goal_angle - base::k_robot_pose_.theta);
+    } else {
+      angle_diff = mathTools::NormalizeAngle(goal_angle - base::k_robot_pose_.theta + M_PI);
+    }
+    // 对正方向
+    if (fabs(angle_diff) > accuracy_gain * mathTools::DegToRad(base::k_ct_.angle_align_thd) + 0.1) {
+      angular = angle_diff;
+      linear = 0.0f;
+    } else {
+      path_align_ = true;
+    }
+  }
+  //速度平滑
+  base::k_cmd_.linear = base::VP_Instance->LinearSpeedSmooth(linear);
+  base::k_cmd_.angular = base::VP_Instance->AngularSpeedSmooth(angular);
+  return path_align_;
+}
 
 void PathTracker::LinearSpeedPlanning() {
   nearest_index_ = mathTools::CalNearestPointIndexOnPath(path_, base::k_robot_pose_, base::k_goal_index_, 50);
@@ -138,7 +217,45 @@ float PathTracker::MpcTracking() {
   return angular;
 }
 
-float PathTracker::DynSysAvoid() {}
+float PathTracker::Avoid() {
+  /***step01->正常跟踪期望速度***/
+  Eigen::Vector2f ref_v;
+  ref_v(0) = base::k_cmd_.linear;
+  ref_v(1) = pp_ptr_->PurePursuitControl(base::k_robot_pose_, base::k_cmd_.linear, base::k_task_.ref_cmd.linear, path_, base::k_goal_index_);
+  /***step02->避障模块调用***/
+  avoid_->SetRealTimeInfo(ref_v, base::k_goal_index_);
+  base::k_goal_index_ = avoid_->GetAvoidGoalId();
+  auto avoid_cmd = avoid_->GetAvoidCmd();
+  base::k_cmd_.linear = base::VP_Instance->LinearSpeedSmooth(avoid_cmd.linear);
+  return avoid_cmd.angular;
+}
+
+void PathTracker::ToPoseCtrl() {
+  //[-TEST-]
+  //虚拟加速度计算
+  vec2f random_acc = vec2f::Random();
+  static port::CommonPose virtual_pose = port::CommonPose(base::k_robot_pose_.x + 0.3f, base::k_robot_pose_.y, base::k_robot_pose_.theta);
+  float dt = 0.02f;                      //系统tick时间
+  random_acc(0) = random_acc(0) * 0.4f;  // 0.8线加速度
+  random_acc(1) = random_acc(1) * 0.6f;  // 1.8角加速度
+  static vec2f virtual_cmd;
+  //虚拟速度生成
+  virtual_cmd = virtual_cmd + dt * random_acc;
+  virtual_cmd(0) = std::max(-0.5f, std::min(0.8f, virtual_cmd(0)));
+  virtual_cmd(1) = std::max(-0.5f, std::min(0.5f, virtual_cmd(1)));
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::normal_distribution<float> noise(0.0f, 0.0f);  //-0.004
+  float pose_noise = noise(gen);
+  pose_noise = std::max(-0.02f, std::min(0.02f, pose_noise));
+  virtual_pose.x += virtual_cmd(0) * cos(virtual_pose.theta) * dt + pose_noise;
+  virtual_pose.x += virtual_cmd(1) * sin(virtual_pose.theta) * dt + pose_noise;
+  virtual_pose.theta += virtual_cmd(1) * dt;
+  port::Twist target_cmd = port::Twist(virtual_cmd(0), virtual_cmd(1));
+  auto vel_cmd = avoid_->PoseControl(base::k_robot_pose_, virtual_pose, target_cmd);
+  base::k_cmd_.linear = base::VP_Instance->LinearSpeedSmooth(vel_cmd.linear);
+  base::k_cmd_.angular = base::VP_Instance->AngularSpeedSmooth(vel_cmd.angular);
+}
 
 void PathTracker::LateralControl() {
   float omega;
@@ -163,7 +280,11 @@ void PathTracker::LateralControl() {
       omega = MpcTracking();
       break;
     }
-    case CtrlALG::DYM_SYS { omega = Avoid(); break; } default:
+    case CtrlALG::DYM_SYS {
+      omega = Avoid(); break;
+    }
+
+    default:
       break;
   }
   if (method_ != CtrlALG::TO_POSE) {
@@ -172,7 +293,27 @@ void PathTracker::LateralControl() {
   }
 }
 
-port::TrackingInternalState PathTracker::PathTracking() {}
+port::TrackingInternalState PathTracker::PathTracking() {
+  /*step00->路径处理*/
+  if (base::k_first_) {
+    base::k_first_ = false;
+    PathDispose();
+  }
+  /*step01->到达判断*/
+  if (ArrivedCheck(true, 5)) {
+    auto state = base::Stop();  // 控制停机+获取停机状态
+    return state;
+  }
+  /*step02->对齐路径起点*/  // TODO：参数调整函数调整
+  if (!PathDirAlign(true, 2.0f)) {
+    base::k_target_ = path_[0];
+    return port::TrackingInternalState::TRACKING;
+  }
+  /*step03->线速度规划*/
+  LinearSpeedPlanning();  // NOTE:注意，如果使用qp速度规划失败的补救措施,误差过大的处理方式
+  /*step04->跟踪控制*/
+  return port::TrackingInternalState::TRACKING;
+}
 
 }  // namespace function
 }  // namespace control

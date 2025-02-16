@@ -1,5 +1,4 @@
 #include "algorithm/avoid/avoid_base.h"
-
 #include "tools/math_tools.h"
 
 namespace modules {
@@ -9,7 +8,7 @@ namespace avoid_base {
 
 namespace mathTools = utilities::mathTools;
 
-datacenter::DataCenter* DC_Instance = datacenter::DataCenter::GetInstance();
+datacenter::DataCenter *DC_Instance = datacenter::DataCenter::GetInstance();
 
 //全局变量定义
 port::CommonPose g_robot_pose;
@@ -83,4 +82,3 @@ void UpdateInfo() {
   DC_Instance->SetAvoidVirtualObs(g_virtual_obs);
   DC_Instance->SetAvoidPlanningVel(g_planning_vel);
 }
-
