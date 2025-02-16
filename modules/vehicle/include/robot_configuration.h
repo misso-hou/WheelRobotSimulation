@@ -95,10 +95,10 @@ inline void GenerateSpaceDriveWheel() {
     }
   }
   std::vector<float> tran_whee_y = wheel_y;
-  std::transform(tran_whee_y.begin(), tran_whee_y.end(), tran_whee_y.begin(), [](float x) { return x * -i; });
+  std::transform(tran_whee_y.begin(), tran_whee_y.end(), tran_whee_y.begin(), [](float x) { return x * -1; });
   left_wheel[0] = wheel_x;
   left_wheel[1] = wheel_y;
-  leftjwheel[2] = wheel_z;
+  left_wheel[2] = wheel_z;
   right_wheel[0] = wheel_x;
   right_wheel[1] = tran_whee_y;
   right_wheel[2] = wheel_z;
@@ -126,7 +126,7 @@ inline void GenerateSpaceOmniWheel() {
       wheel_y[2 * i + 1] = y_array[i] - omni_wheel_width;
     } else {
       wheel_y[2 * i] = y_array[i] - omni_wheel_width;
-      wheelZy[2 * i + 1] = y_array[i];
+      wheel_y[2 * i + 1] = y_array[i];
     }
   }
   std::vector<float> tran_whee_y = wheel_y;

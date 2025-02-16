@@ -30,7 +30,7 @@ vec2f DynamicSys::LimitIntersectionAngle(const vec2f& benchmark_vec, const vec2f
     if (object.dot(benchmark_tangent) > 0) {
       new_vec = mathTools::VecRotateByAngle(-new_angle, benchmark);
     } else {
-      new_vec = mathTools::(new_angle, benchmark);
+      new_vec = mathTools::VecRotateByAngle(new_angle, benchmark);
     }
     new_vec = new_vec.normalized();
   }
@@ -187,7 +187,7 @@ void DynamicSys::CalStrechingMat(port::CircleAgent& agent) {
     //[-TEST-]
     given_dir = port::AvoidDir::left;
     //车头方向与期望方向相反，强制约束期望方向(因为一个障碍物可能改变agent整体的期望速度方向)
-    // agent.ref_vel_vec = limitIntersectionAngle(ab::g_circle.heading_dir,agent.ref_vel_vec,0.8*M_PI);
+    // agent.ref_vel_vec = LimitIntersectionAngle(ab::g_circle.heading_dir, agent.ref_vel_vec, 0.8*M_PI);
     // [x]:如果不指定绕障方向，则根据车头方向，设定绕障方向
     if (given_dir == port::AvoidDir::random) {
       //车头与障碍物切线方向计算
@@ -306,7 +306,7 @@ void DynamicSys::CalAgentModulatedV(port::CircleAgent& agent) {
     // 统一到当前速度坐标系
     vec2f Ki_normal = (to_oriV_frame * modulate_v).normalized();
     // 机器相对障碍物运动趋势计算(方向夹角)
-    float angle_space = atan2f(Ki_normal(1), Ki_normal(0);
+    float angle_space = atan2f(Ki_normal(1), Ki_normal(0));
     sum_angle_space += angle_space * agent.calculated_obstacles[i].weight;
   }
   // 障碍物合成速度矢量计算(当前速度坐标系)

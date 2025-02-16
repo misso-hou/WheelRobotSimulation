@@ -12,6 +12,8 @@ using namespace std;
 namespace Anim = modules::animation;
 Anim::Animation *Animator = Anim::Animation::GetInstance();
 
+const double record_map_resolution = 0.0043;
+
 /**
  *@brief:获取绘制曲线数据
  *@param:
@@ -170,7 +172,7 @@ bool KeyboardCtrl(int &index) {
     // 下键速度/2
     else if (input == "\033[B") {
       cycle_time_ *= 2;
-      cycle_time_ = min(cycle_time, 100);
+      cycle_time_ = min(cycle_time_, 100);
       cout << "loop step cycle_time_ :" << cycle_time_ << "(us)" << endl;
     }
     // 右键快进
@@ -179,10 +181,10 @@ bool KeyboardCtrl(int &index) {
       index = min(data_length_ - 1, index);
       erase_ = true;
     }
-    // 左键快退
+    // 左键倒退
     else if (input == "\033[D") {
       index -= 100;
-      index = min(index, 0);
+      index = max(index, 0);
       erase_ = true;
     }
     copy_time = cycle_time_;
@@ -218,7 +220,7 @@ bool KeyboardCtrl(int &index) {
     cout << "\033[31m !!!已显示全部数据!!! \33[0m" << endl;
     cout << "\033[32m 按 'c' 继续程序，'q' 退出程序。\33[0m" << endl;
     //等待用户输入
-    char key == GetKey();
+    char key = GetKey();
     if (key == "c") {
       index = 0;
       erase_ = true;
@@ -230,18 +232,19 @@ bool KeyboardCtrl(int &index) {
       index--;
     }
   }
+
   return true;
 }
 
 void SetParam(int argc, char *argv[]) {
-  //文件路径设置
+  //文件路径配置
   char currentPath[FILENAME_MAX];
   getcwd(currentPath, sizeof(currentPath));
   string current_path = string(currentPath);
   // 设置播放速度(默认周期20ms)
-  cycle_time = argc >= 2 ? stoi(argv[1]) : 10;
+  cycle_time_ = argc >= 2 ? stoi(argv[1]) : 10;
   // 播放位置设置（tick累计)
-  start_index = argc >= 3 ? stoi(argv[2]) : 0;
+  start_index = argc >= 3 ? atoi(argv[2]) : 0;
   // 指定文件夹序号(每个文件夹例如csv01,csv02...存放多组数据）
   file_path_ = argc >= 4 ? argv[3] : "";
   file_path_ = current_path + "/csvLog" + file_path_ + "/";
@@ -268,8 +271,8 @@ void ExtractData() {
   border_mat_ = RowDataReader(path_file_, 3, 3);
   // obs
   sync_pose_mat_ = RowDataReader(obs_file_, 3, 1);
-  sensor_pose_mat_ = RowDataReader(obs_file_, 3, 2);
-  map_pose_mat_ = RowDataReader(obs_file_, 3, 3);
+  sensor_obs_mat_ = RowDataReader(obs_file_, 3, 2);
+  map_obs_mat_ = RowDataReader(obs_file_, 3, 3);
   // 显示数据提取
   start_pose_.x = sync_pose_mat_[0][0];
   start_pose_.y = sync_pose_mat_[0][1];
@@ -313,10 +316,11 @@ int main(int argc, char *argv[]) {
   SetParam(argc, argv);
   ExtractData();
   Animator->InitializePlt(start_pose_, Anim::Mode::LOGGER);
-  for (int i = start_index_; i < data_length_;) {  //数据行遍历
+  for (int i = start_index_; i < data_length_;)  //数据行遍历
+  {
     //键盘控制
     if (!KeyboardCtrl(i)) break;
-    int64_t start_time = TimeToolKit::TimeSpaceSysCurrentMs();
+    int64_t start_time = TimeToolKit::TimeSpecSysCurrentMs();
     UpdateData(i);
     Animator->SetTrackingData(robot_pose_, cmd_, path_, curves_, borders_, target_, erase_, blade_);
     Animator->SetObsData(sync_pose_, sensor_obs_mat_[obs_id_], map_obs_mat_[obs_id_]);
@@ -325,7 +329,7 @@ int main(int argc, char *argv[]) {
     Animator->CmdMonitor(600);
     Animator->ObsMonitor();
     Animator->SpaceRobot(1.5f);
-    int64_t end_time = TimeToolKit::TimeSpacSysCurrentMs();
+    int64_t end_time = TimeToolKit::TimeSpecSysCurrentMs();
     int64_t remaining_T = cycle_time_ - (end_time - start_time);
     if (remaining_T > 0) {
       this_thread::sleep_for(chrono::milliseconds(remaining_T));

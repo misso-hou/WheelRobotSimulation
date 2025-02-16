@@ -27,7 +27,7 @@ vector<Eigen::Vector2f> boundary;
 //功能模块
 logger::Logger* Data_Logger = logger::Logger::GetInstance();
 animation::Animation* Animator = animation::Animation::GetInstance();
-datacenter::DataCenter* DC_lnstance = datacenter::DataCenter::GetInstance();
+datacenter::DataCenter* DC_Instance = datacenter::DataCenter::GetInstance();
 control::ControlCenter* Ctrl_Center = control::ControlCenter::GetInstance();
 env::Environment Obs_Env;
 vehicle::SimulantRobot Virtual_Robot;
@@ -202,7 +202,7 @@ int main() {
       auto ctrl_task = port::TrackingTask{};
       ctrl_task.task_type = port::TaskType::PURSUIT;
       ctrl_task.ref_cmd.linear = 1.0f;
-      Ctrl_Center->SetControlTask(ctrl_task, task_path, control::function::CtrlALG::PP);
+      Ctrl_Center->SetControlTask(ctrl_task, task_path, control::function::CtrlALG::DYM_SYS);
     } else if (ctrl_state == port::TrackingInternalState::SUCCESS) {
       cout << "control task finished! new task staring..." << endl;
       ctrl_state = port::TrackingInternalState::INIT;

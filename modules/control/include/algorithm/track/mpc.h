@@ -1,14 +1,16 @@
 #pragma once
+
+#include <Eigen/Dense>
+#include <Eigen/SparseCore>  //note:无法引用<Eigen/Sparse>,所以也无法引用OsqpEigen
 #include <iostream>
 #include <memory>
 #include <mutex>
 #include <thread>
 
 #include "OsqpEigen/OsqpEigen.h"
-#include "bycycle.h"
+#include "bycicle.h"
 #include "common_port/data_port.h"
 #include "unicycle.h"
-// #include "vehicle_model.h"
 
 using namespace std;
 namespace port = utilities::port;
@@ -31,6 +33,7 @@ class MPCController {
     mpc_enable_ = false;
     osqp_solver_init_flag_ = true;
   }
+
   float GetMPCOutput() {
     lock_guard<mutex> lk(solution_thread_lock_);
     return mpc_output_;
@@ -49,8 +52,8 @@ class MPCController {
   std::unique_ptr<OsqpEigen::Solver> osqp_solver_;
   std::shared_ptr<vehicle::Unicycle> model_;
   //实时数据
-  Eigen : : VectorXf cur_x_;  //当前误差信息（横向误差+航向误差）
-  int cur_ref_id_;            // 当前最近点
+  Eigen::VectorXf cur_x_;  //当前误差信息（横向误差+航向误差）
+  int cur_ref_id_;         //当前最近点
   port::CommonPose cur_pose_;
   Eigen::VectorXd cur_u_;
   //控制器预设变量
@@ -77,7 +80,7 @@ class MPCController {
   Eigen::VectorXd upper_bound_;
   //求解器
   // unique_ptr<OsqpEigen::Solver> osqp_solver_;
-  bool osqp_solver_init_flag_ = false;  // note：无法在头文件中引用054p・6190n头文（
+  bool osqp_solver_init_flag_ = false;  // note：无法在头文件中引用osqp-eigen头文件
   int no_solution_count_;               //计算异常计数
   Eigen::VectorXd qp_solution_;
   float mpc_output_;

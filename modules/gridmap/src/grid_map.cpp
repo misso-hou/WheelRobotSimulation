@@ -74,7 +74,7 @@ void GridMap::SensorEraseLayerInit() {
  *	pos:点坐标
  *	polygon: polygon顶点
  */
-bool GridMap::IslnPolygon(const Position& pos, const vector<Position>& polygon) {
+bool GridMap::IsInPolygon(const Position& pos, const vector<Position>& polygon) {
   int n = polygon.size();
   bool inside = false;
   for (int i = 0; i < n; ++i) {

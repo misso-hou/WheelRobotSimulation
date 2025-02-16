@@ -27,11 +27,11 @@ void AvoidCenter::InitAvoidbase() {
   sample_circle.range = 3.0f;
   sample_circle.center_x = 0.5f;
   sample_circle.center_y = 0.0f;
-  sample_circle.sub_num = 1.0f;
+  sample_circle.radius = 1.0f;
   // 避障轮廓设置
   // vector<port::BoundaryCircle> avoid_circles(1);
-  // avoid_circles[0].radius = 0.665f;
-  // avoid_circles[0].center_x = 0.68f;
+  // avoid_circles[0].radius = 0.81f;
+  // avoid_circles[0].center_x = 0.48f;
   // avoid_circles[0].center_y = 0.0f;
   // avoid_circles[0].safe_margin = 0.1f;
   vector<port::BoundaryCircle> avoid_circles(2);
@@ -43,7 +43,6 @@ void AvoidCenter::InitAvoidbase() {
   avoid_circles[1].center_x = 0.3f;
   avoid_circles[1].center_y = 0.0f;
   avoid_circles[1].safe_margin = 0.2f;
-  ds_avoid_ptr_->SetCircleAgent(avoid_circles);
   // 障碍物处理方法
   ab::Method method = ab::Method::POLYGON;
   ab::Init(sample_circle, avoid_circles, method);

@@ -23,10 +23,11 @@ PathTracker::PathTracker() {
   // stanley跟踪算法(横向误差比例系数\横向误差平滑系数\前后轮轴距(虚拟可调))
   stanley_ptr_ = make_shared<alg::StanleyController>(2.0f, 0.0, 0.91f);
   // mpc控制器
-  auto vehicle = make_shared<modules::vehicle::Unicycle>(base::k_cp_.min_omega, base::k_cp_.max_omega, -base::k_cp_.angular_acc);
+  auto vehicle =
+      make_shared<modules::vehicle::Unicycle>(base::k_cp_.min_omega, base::k_cp_.max_omega, -base::k_cp_.angular_acc, base::k_cp_.angular_acc);
   mpc_ptr_ = make_shared<alg::MPCController>(vehicle, 0.1f, 3.0f);
   //避障模块
-  avoid_ = make_shared<avoidCenter>();
+  avoid_ = make_shared<AvoidCenter>();
 }
 
 void PathTracker::ResetPathTracker(const vector<port::CommonPose>& new_path, const CtrlALG& method) {
@@ -55,6 +56,7 @@ void PathTracker::PathDispose() {
   base::DC_Instance->SetTrajectoryPath(traj_path_);
   //算法模块传参
   mpc_ptr_->SetRefTrajectory(traj_path_);
+  avoid_->SetTrackingPath(path_);
 }
 
 bool PathTracker::ArrivedCheck(bool overtime_check, int dis_gain) {
@@ -78,8 +80,7 @@ bool PathTracker::ArrivedCheck(bool overtime_check, int dis_gain) {
     //情况二：根据终点坐标系判断异常
     if (path_.size() > 1) {
       terminal_pose.theta = mathTools::PointsAngle(terminal_pose, path_[path_.size() - 2]);
-      port::CommonPose pose_ref_end = mathTools::Global2Rob(terminal_pose,
-                                                            base::k_robot_pose_);  // 将机器人位置转换到路径终点局部坐标系上,判断便宜量
+      port::CommonPose pose_ref_end = mathTools::Global2Rob(terminal_pose, base::k_robot_pose_);  // 将机器人位置转换到路径终点局部坐标系上,判断偏移量
       if (pose_ref_end.x > 0.f || fabs(pose_ref_end.y) > 1.0f) {
         force_arrive_flag = true;
       }
@@ -98,9 +99,9 @@ bool PathTracker::ArrivedCheck(bool overtime_check, int dis_gain) {
 /*
  *@brief:路径跟踪开始方向对正
  *@param:
- *   approach_switch:是否先到路径起点再对正方向
- *   accuracy_gain:到达精度
- *@return 角速度
+ *   approach_switch:是否需要先到路径起点再对正方向
+ *   accuracy_gain:到达精度增益
+ *@return:角速度
  */
 bool PathTracker::PathDirAlign(bool approach_switch, const float& accuracy_gain) {
   static bool local_first_flag = true;
@@ -126,13 +127,13 @@ bool PathTracker::PathDirAlign(bool approach_switch, const float& accuracy_gain)
     if (pose_ref_end.x > 0.2f || fabs(pose_ref_end.y) > 1.0f) {
       approach_ = true;
     }
-    // 02->靠近路径
+    // 02->靠近路径起点
     if (goal_dist > accuracy_gain * base::k_ct_.arrival_accuracy_thd && !approach_) {
       goal_angle = mathTools::PointsAngle(goal, base::k_robot_pose_) - base::k_robot_pose_.theta;
       if (base::k_task_.ref_cmd.linear >= 0) {
-        goal.theta = mathTools::PointsAngle(goal_angle);
+        goal_angle = mathTools::NormalizeAngle(goal_angle);
       } else {
-        goal.theta = mathTools::PointsAngle(goal_angle + M_PI);
+        goal_angle = mathTools::NormalizeAngle(goal_angle + M_PI);
       }
       angular = goal_angle;
       if (goal_dist > 2) {
@@ -142,16 +143,18 @@ bool PathTracker::PathDirAlign(bool approach_switch, const float& accuracy_gain)
       }
       if (fabs(goal_angle) > M_PI / 6) linear = 0.0f;
     }
-    // 03->到达路径起点,对正路径
-    approach_ = true;
-    goal_angle = mathTools::PointsAngle(path_[1], path_[0]);
-    if (base::k_task_.ref_cmd.linear >= 0) {
-      angle_diff = mathTools::NormalizeAngle(goal_angle - base::k_robot_pose_.theta);
-    } else {
-      angle_diff = mathTools::NormalizeAngle(goal_angle - base::k_robot_pose_.theta + M_PI);
+    // 03->到达路径起点,对正路径方向
+    else {
+      approach_ = true;
+      goal_angle = mathTools::PointsAngle(path_[1], path_[0]);
+      if (base::k_task_.ref_cmd.linear >= 0) {
+        angle_diff = mathTools::NormalizeAngle(goal_angle - base::k_robot_pose_.theta);
+      } else {
+        angle_diff = mathTools::NormalizeAngle(goal_angle - base::k_robot_pose_.theta + M_PI);
+      }
+      linear = 0.0f;
     }
-    linear = 0.0f;
-    // 对准路径起点方向判断
+    // 对准路径起始方向判断
     if (approach_) {
       if (fabs(angle_diff) > accuracy_gain * mathTools::DegToRad(base::k_ct_.angle_align_thd) + 0.1f) {
         angular = angle_diff;
@@ -170,7 +173,7 @@ bool PathTracker::PathDirAlign(bool approach_switch, const float& accuracy_gain)
       angle_diff = mathTools::NormalizeAngle(goal_angle - base::k_robot_pose_.theta + M_PI);
     }
     // 对正方向
-    if (fabs(angle_diff) > accuracy_gain * mathTools::DegToRad(base::k_ct_.angle_align_thd) + 0.1) {
+    if (fabs(angle_diff) > accuracy_gain * mathTools::DegToRad(base::k_ct_.angle_align_thd) + 0.1f) {
       angular = angle_diff;
       linear = 0.0f;
     } else {
@@ -185,7 +188,7 @@ bool PathTracker::PathDirAlign(bool approach_switch, const float& accuracy_gain)
 
 void PathTracker::LinearSpeedPlanning() {
   nearest_index_ = mathTools::CalNearestPointIndexOnPath(path_, base::k_robot_pose_, base::k_goal_index_, 50);
-  // tie(proximate_dg_border_,proximate_sharp_curve_) = path_classify_ptr_->GetProximateSpecialPath(ne
+  // tie(proximate_dg_border_,proximate_sharp_curve_) = path_classify_ptr_->GetProximateSpecialPath(nearest_index_);
   port::CommonPose nearest_point = path_[nearest_index_];
   float lateral_error = mathTools::PointsDis(nearest_point, base::k_robot_pose_);
   float ref_dir = mathTools::PointsAngle(path_[base::k_goal_index_], base::k_robot_pose_);
@@ -237,7 +240,7 @@ void PathTracker::ToPoseCtrl() {
   static port::CommonPose virtual_pose = port::CommonPose(base::k_robot_pose_.x + 0.3f, base::k_robot_pose_.y, base::k_robot_pose_.theta);
   float dt = 0.02f;                      //系统tick时间
   random_acc(0) = random_acc(0) * 0.4f;  // 0.8线加速度
-  random_acc(1) = random_acc(1) * 0.6f;  // 1.8角加速度
+  random_acc(1) = random_acc(1) * 0.6f;  // 1.0角加速度
   static vec2f virtual_cmd;
   //虚拟速度生成
   virtual_cmd = virtual_cmd + dt * random_acc;
@@ -245,11 +248,11 @@ void PathTracker::ToPoseCtrl() {
   virtual_cmd(1) = std::max(-0.5f, std::min(0.5f, virtual_cmd(1)));
   std::random_device rd;
   std::mt19937 gen(rd());
-  std::normal_distribution<float> noise(0.0f, 0.0f);  //-0.004
+  std::normal_distribution<float> noise(0.0f, 0.0f);  // 0.004
   float pose_noise = noise(gen);
   pose_noise = std::max(-0.02f, std::min(0.02f, pose_noise));
   virtual_pose.x += virtual_cmd(0) * cos(virtual_pose.theta) * dt + pose_noise;
-  virtual_pose.x += virtual_cmd(1) * sin(virtual_pose.theta) * dt + pose_noise;
+  virtual_pose.y += virtual_cmd(1) * sin(virtual_pose.theta) * dt + pose_noise;
   virtual_pose.theta += virtual_cmd(1) * dt;
   port::Twist target_cmd = port::Twist(virtual_cmd(0), virtual_cmd(1));
   auto vel_cmd = avoid_->PoseControl(base::k_robot_pose_, virtual_pose, target_cmd);
@@ -280,10 +283,10 @@ void PathTracker::LateralControl() {
       omega = MpcTracking();
       break;
     }
-    case CtrlALG::DYM_SYS {
-      omega = Avoid(); break;
+    case CtrlALG::DYM_SYS: {
+      omega = Avoid();
+      break;
     }
-
     default:
       break;
   }
@@ -312,6 +315,7 @@ port::TrackingInternalState PathTracker::PathTracking() {
   /*step03->线速度规划*/
   LinearSpeedPlanning();  // NOTE:注意，如果使用qp速度规划失败的补救措施,误差过大的处理方式
   /*step04->跟踪控制*/
+  LateralControl();
   return port::TrackingInternalState::TRACKING;
 }
 

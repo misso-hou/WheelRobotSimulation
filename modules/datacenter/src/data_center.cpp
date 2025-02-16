@@ -144,70 +144,92 @@ port::CommonPose DataCenter::GetRobotPose() {
   std::shared_lock<std::shared_mutex> lock(data_mutex_);
   return robot_pose_;
 }
+
 port::CommonPose DataCenter::GetAiSyncRobotPose() {
   std::shared_lock<std::shared_mutex> lock(data_mutex_);
   return ai_sync_robot_pose_;
 }
+
 port::CommonPose DataCenter::GetTargetPose() {
   std::shared_lock<std::shared_mutex> lock(data_mutex_);
   return target_pose_;
 }
+
+port::CommonPose DataCenter::GetTestTempPose() {
+  std::shared_lock<std::shared_mutex> lock(data_mutex_);
+  return test_temp_pose_;
+}
+
 int DataCenter::GetNearestPointId() {
   std::shared_lock<std::shared_mutex> lock(data_mutex_);
   return nearest_point_id_;
 }
+
 poses DataCenter::GetPlanningPath() {
   std::shared_lock<std::shared_mutex> lock(data_mutex_);
   return planning_path_;
 }
+
 poses DataCenter::GetSpCurves() {
   std::shared_lock<std::shared_mutex> lock(data_mutex_);
   return plt_sharp_curves_;
 }
+
 poses DataCenter::GetDgBorders() {
   std::shared_lock<std::shared_mutex> lock(data_mutex_);
   return plt_dg_borders_;
 }
+
 vector<port::TrajPoint> DataCenter::GetTrajectoryPath() {
   std::shared_lock<std::shared_mutex> lock(data_mutex_);
   return traj_path_;
 }
+
 poses DataCenter::GetMpcHorizon() {
   std::shared_lock<std::shared_mutex> lock(data_mutex_);
   return mpc_horizon_;
 }
+
 port::Twist DataCenter::GetCmdVel() {
   std::shared_lock<std::shared_mutex> lock(data_mutex_);
   return cmd_vel_;
 }
+
 vector<pair<vector<float>, vector<float>>> DataCenter::GetPlotObsPoints() {
   std::shared_lock<std::shared_mutex> lock(data_mutex_);
   return plot_obs_points_;
 }
+
 vector<Eigen::Vector2f> DataCenter::GetObsPointsCloud() {
   std::shared_lock<std::shared_mutex> lock(data_mutex_);
   return obs_points_cloud_;
 }
+
 vector<Eigen::Vector2f> DataCenter::GetBoundary() {
   std::shared_lock<std::shared_mutex> lock(data_mutex_);
   return boundary_;
 }
+
 vector<Eigen::Vector2f> DataCenter::GetAiObs() {
   std::shared_lock<std::shared_mutex> lock(data_mutex_);
   return ai_obs_;
 }
+
 vector<Eigen::Vector2f> DataCenter::GetMapObs() {
   std::shared_lock<std::shared_mutex> lock(data_mutex_);
   return map_obs_;
 }
+
 vector<vector<float>> DataCenter::GetLidarData() {
   std::shared_lock<std::shared_mutex> lock(data_mutex_);
   return lidar_data_;
 }
+
 bool DataCenter::GetCsvSwitch() {
   std::shared_lock<std::shared_mutex> lock(data_mutex_);
   return csv_logger_switch_;
 }
+
 bool DataCenter::GetPathUpdateFlag() {
   std::shared_lock<std::shared_mutex> lock(data_mutex_);
   return path_update_flag_;
@@ -276,26 +298,32 @@ vector<port::CircleAgent> DataCenter::GetDsAvoidAgents() {
   std::shared_lock<std::shared_mutex> lock(data_mutex_);
   return avoid_agents_;
 }
+
 vector<port::SamplePoint> DataCenter::GetAvoidSamplePoints() {
   std::shared_lock<std::shared_mutex> lock(data_mutex_);
   return avoid_sample_points_;
 }
+
 vector<vector<port::ClusterPoint>> DataCenter::GetAvoidClusterGroup() {
   std::shared_lock<std::shared_mutex> lock(data_mutex_);
   return avoid_cluster_groups_;
 }
+
 vector<Eigen::Vector2f> DataCenter::GetAvoidVirtualObsCenter() {
   std::shared_lock<std::shared_mutex> lock(data_mutex_);
   return avoid_vritual_obs_center_;
 }
+
 vector<Eigen::Vector2f> DataCenter::GetAvoidObsNearestPoints() {
   std::shared_lock<std::shared_mutex> lock(data_mutex_);
   return avoid_obs_nearest_points_;
 }
+
 vector<port::VirtualObs> DataCenter::GetAvoidVirtualObs() {
   std::shared_lock<std::shared_mutex> lock(data_mutex_);
   return avoid_virtual_obs_;
 }
+
 Eigen::Vector3f DataCenter::GetAvoidPlanningVel() {
   std::shared_lock<std::shared_mutex> lock(data_mutex_);
   return avoid_planning_vel_;
@@ -310,7 +338,7 @@ mesh2D DataCenter::GetRobotOutline(const port::CommonPose& robot_pose) {
     float local_y = robot_pose.y + points[i][0] * sin(robot_pose.theta) + points[i][1] * cos(robot_pose.theta);
     out_points[i].resize(2);
     out_points[i][0] = local_x;
-    out_points[i][i] = local_y;
+    out_points[i][1] = local_y;
   }
   return out_points;
 }
@@ -353,7 +381,7 @@ vector<mesh2D> DataCenter::GetVisionBoundary(const port::CommonPose& robot_pose)
   vector<mesh2D> vision_boundary(4);
   vector<mesh2D> orin_vision_boundary(4);
   orin_vision_boundary[0] = robot::front_vision_boundary;
-  orin_vision_boundary[l] = robot::back_vision_boundary;
+  orin_vision_boundary[1] = robot::back_vision_boundary;
   orin_vision_boundary[2] = robot::left_vision_boundary;
   orin_vision_boundary[3] = robot::right_vision_boundary;
   for (uint i = 0; i < 4; i++) {

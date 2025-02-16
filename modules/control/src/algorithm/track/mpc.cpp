@@ -6,12 +6,12 @@
 #include "tools/math_tools.h"
 
 /*
-* QP问题设计：
-*方式一：MPC转QP问题，优化变量为 horizon内的控制变量U
-说明：套用MPC extend state space转QP标准公式,代码量少，内部计算较复杂抽象
-*方式二: QP优化变量为state error
-* 说明：使用标准state space模型,分步迭代计算,较直观，相对好理解
-*/
+ * QP问题设计：
+ * 方式一：MPC转QP问题，优化变量为 horizon内的控制变量U
+ *   说明：套用MPC extend state space转QP标准公式,代码量少，内部计算较复杂抽象
+ * 方式二: QP优化变量为state error
+ *   说明：使用标准state space模型,分步迭代计算,较直观，相对好理解
+ */
 namespace mathTools = utilities::mathTools;
 
 namespace modules {
@@ -19,6 +19,7 @@ namespace control {
 namespace algorithm {
 
 datacenter::DataCenter* DC_Instance = datacenter::DataCenter::GetInstance();
+
 /*
  * @brief:MPC控制器初始化
  * @param:
@@ -85,7 +86,7 @@ void MPCController::SetRefTrajectory(const vector<port::TrajPoint>& ref_trajecto
 }
 
 /*
- * @brief:MPC转QP问题(方式一：优化变量为horizon control input U)(note:忽略Y = C*X,默认C为单位单位矩阵
+ * @brief:MPC转QP问题(方式一：优化变量为horizon control input U)(note:忽略Y = C*X,默认C为单位单位矩阵)
  */
 void MPCController::CalQPCostFunction() {
   // extend state space matrix
@@ -313,6 +314,7 @@ int32_t MPCController::MpcThreadFun() {
   }
   return 0;
 }
+
 }  // namespace algorithm
 }  // namespace control
 }  // namespace modules

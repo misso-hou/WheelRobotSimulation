@@ -13,7 +13,6 @@ namespace modules {
 namespace vehicle {
 
 class SimulantRobot {
-
  public:
   SimulantRobot(){};
   ~SimulantRobot(){};

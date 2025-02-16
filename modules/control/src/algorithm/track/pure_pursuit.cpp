@@ -1,10 +1,11 @@
 #include "algorithm/track/pure_pursuit.h"
+
 #include "tools/math_tools.h"
 
 namespace mathTools = utilities::mathTools;
 
 namespace modules {
-namespace controlNew {
+namespace control {
 namespace algorithm {
 
 /**
@@ -24,30 +25,30 @@ int PurePursuit::GetTargetIndex(const port::CommonPose& pose, const float& ref_v
     dist.push_back(sqrtf(pow(pose.x - point.x, 2) + pow(pose.y - point.y, 2)));
   }
   vector<float>::iterator it = find(dist.begin(), dist.end(), *min_element(dist.begin(), dist.end()));
+
   int index_new = distance(dist.begin(), it);
   index_new = max(index, index_new);
   if (index_new - index > 20) index_new = index;  //路径最近点索引
   float length = dist[index_new];
   // float newlD = (klD_ * ref_v) + lD_; // 新的预瞄距离计算
-  // float new_ld = (ref_v / (2.0	* max_v)) * ld_;
-  // note:保证高速预瞄距离尽可能远,弯道(低速)预瞄准距离可以降到足够小
+  // float new_ld = (ref_v / (2.0	* max_v)) * ld_;  // note:保证高速预瞄距离尽可能远,弯道(低速)预瞄准距离可以降到足够小
   float new_ld = ref_v * ld_;
   new_ld = max(min_ld_, new_ld);
   while ((new_ld > length) && (index_new < path.size() - 1)) {
     float x0 = path[index_new].x;
     float y0 = path[index_new].y;
     index_new++;                                                // update goal point index within the look ahead distance
-    length = sqrtf(pow(x0 - pose.x, 2) + pow(y0 - pose.y, 2));  //更新目标点相对后轮中心距禽
+    length = sqrtf(pow(x0 - pose.x, 2) + pow(y0 - pose.y, 2));  //更新目标点相对后轮中心距离
   }
   return index_new;
 }
 
-/*
+/**
  * @brief:计算路径上目标点,获取并更新目标点索引
  * @param:
  *   pose:机器人当前位姿
  *   linear_v:规划线速度
- *   targetlIdx:目标点索引
+ *   targetIdx:目标点索引
  * @return:
  *   omega:控制角速度
  */
@@ -74,5 +75,5 @@ float PurePursuit::PurePursuitControl(const port::CommonPose& pose, const float&
 }
 
 }  // namespace algorithm
-}  // namespace controlNew
+}  // namespace control
 }  // namespace modules

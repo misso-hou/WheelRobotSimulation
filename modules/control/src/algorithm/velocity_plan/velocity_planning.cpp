@@ -58,7 +58,7 @@ void VelocityPlanner::SetPathData(const vector<port::CommonPose>& path, port::Pa
  * @return:规划线速度
  */
 float VelocityPlanner::VelocityAllot(const vector<port::TrajPoint>& traj_path, const int closest_point_index, const float& heading_error,
-                                     const float lateral_error) {
+                                     const float& lateral_error) {
   vector<port::TrajPoint> copy_traj_path = traj_path;
   float cmd_linear_v;  //下发线速度
   /*场景速度:接近终点速度,异常状态处理速度,曲线跟踪速度,斜坡速度*/
@@ -69,7 +69,7 @@ float VelocityPlanner::VelocityAllot(const vector<port::TrajPoint>& traj_path, c
     state_v = ctrl_param_.min_arround_v;  //异常状态速度设置
   } else if (action_state_ == port::ActionState::SHUTDOWN) {
     state_v = 0.0f;
-    vel_panner_dec_ = ctrl_param_.deceleration;
+    vel_planner_dec_ = ctrl_param_.deceleration;
   }
   /*确定规划速度*/
   float option_v = min(error_limit_v, min(slope_v, min(traj_ref_v, state_v)));

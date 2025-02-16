@@ -38,6 +38,7 @@ void PID::ControllerReset(void) {
 }
 
 void PID::ClearIntergral(void) { integral_ = 0.0f; }
+
 }  // namespace algorithm
 }  // namespace control
 }  // namespace modules

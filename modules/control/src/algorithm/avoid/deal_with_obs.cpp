@@ -221,7 +221,7 @@ vector<port::VirtualObs> DealWithObs::ObsPointsInterpolation(const vvcp& cluster
     // spline_xs = obs_x;
     // spline_ys = obs_y;
     // // 直线插值
-    // std::tie(spline_xs, spline_ys) = itp_tools_.LineInterpolate(obs_x, obs_y,interpolate_dis_);
+    // std::tie(spline_xs, spline_ys) = itp_tools_.LineInterpolate(obs_x, obs_y, interpolate_dis_);
     // 样条插值
     std::tie(spline_xs, spline_ys) = itp_tools_.InterpolateXY(obs_x, obs_y, interpolate_dis_);
     // 插值障碍物点获取
@@ -271,7 +271,7 @@ vvcp DealWithObs::ConvexClusterGroup(const vvcp& cluster_group) {
     for (auto id : hullIndices) {
       ConvexGroups[i].push_back(cluster_group[i][id]);
     }
-    ConvexGroups[i].push_back(ConvecGroups[i].front());
+    ConvexGroups[i].push_back(ConvexGroups[i].front());
   }
   return ConvexGroups;
 }

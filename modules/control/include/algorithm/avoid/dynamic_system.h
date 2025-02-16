@@ -32,12 +32,12 @@ class DynamicSys {
 
  private:
   port::AvoidDir CalAvoidDir(const port::VirtualObs& vt_obs);
-  vec2f LimitlntersectionAngle(const vec2f& benchmark_vec, const vec2f& object_vec, const float& angle_thd);
+  vec2f LimitIntersectionAngle(const vec2f& benchmark_vec, const vec2f& object_vec, const float& angle_thd);
   void CalAgentsCalObsBasicInfo(port::CircleAgent& agent);
   void ComputeAgentsCalObsInfo();
   void CalObsWeights(vector<port::CalculatedObs>& obstacles);
   void CalStrechingMat(port::CircleAgent& agent);
-  void CalAgentModulatedV(port::CircleAgent&agent), ;
+  void CalAgentModulatedV(port::CircleAgent& agent);
   port::Twist SynthesizeAvoidCmd(const float& planning_v);
 
  private:

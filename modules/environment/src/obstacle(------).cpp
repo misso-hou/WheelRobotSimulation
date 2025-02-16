@@ -107,7 +107,7 @@ void Obstacle::ContourInitialize() {
     Eigen::Matrix2f rotate_matrix;  // local to global
     rotate_matrix << cos(center_pose_.theta), -sin(center_pose_.theta), sin(center_pose_.theta), cos(center_pose_.theta);
     for (int i = 0; i < origin_obs_points_.rows(); i++) {
-      Eigen::Vector2f local_point(origin_obs_, origin_obs_points_.row(i)(1));
+      Eigen::Vector2f local_point(origin_obs_points_.row(i)(0), origin_obs_points_.row(i)(1));
       Eigen::Vector2f global_point = rotate_matrix * local_point + pose;
       trans_obs_points_.push_back(global_point);
       obs_x[i] = global_point(0);
@@ -145,7 +145,7 @@ void Obstacle::RandomCloudObsUpdate() {
   std::random_device rd;
   std::mt19937 gen(rd());
   // 轮廓内随机点生成
-  Eigen::MatrixXf obs_points(3 * point_num_, 2);
+  Eigen::MatrixXf obs_points(3 * points_num_, 2);
   // 障碍物边界点计算
   vector<float> alpha = mathTools::linspace(-M_PI, M_PI, points_num_);
   // 椭圆形轮廓点集
@@ -190,28 +190,27 @@ void Obstacle::EllipCloudObsUpdate() {
   origin_obs_points_ = obs_points;
 }
 
-// 障碍物点坐标系变换
-void Obstacle::ObsTransform() {
-  // 坐标系转换矩阵
-  Eigen::Matrix<float, 2, 3> transformationMatrix;
-  transformationMatrix << cos(center_pose_.theta), -sin(center_pose_.theta), center_pose_.x, sin(center_pose_.theta), cos(center_pose_.theta),
-      center_pose_.y;
-  // 轮廓点矩阵变形
-  Eigen::MatrixXf pointsWithOnes(origin_obs_points_.rows(), origin_obs_points_.cols() + 1);
-  pointsWithOnes << origin_obs_points_, Eigen::MatrixXf::Ones(origin_obs_points_.rows(), 1);
-  // 坐标系变换(local to global)
-  Eigen::MatrixXf globalPoints = pointsWithOnes * transformationMatrix.transpose();
-  // 更新障碍物轮廓
-  obs_points_ = globalPoints;
-  // 显示障碍物与外发计算数据格式
-  vector<float> obs_x(obs_points_.rows()), obs_y(obs_points_.rows());
-  trans_obs_points_.clear();
-  for (int i = 0; i < obs_points_.rows(); i++) {
-    trans_obs_points_.push_back(obs_points_.row(i));
-    obs_x[i] = obs_points_(i, 0);
-    obs_y[i] = obs_points_(i, 1);
+// 随机点云障碍物更新
+void Obstacle::RectCloudObsUpdate() {
+  // 设置随机数生成器
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  // 矩形顶点
+  float halfWidth = width_ / 2.0;
+  float halfHeight = height_ / 2.0;
+  // 轮廓内随机点生成
+  Eigen::MatrixXf obs_points(points_num_, 2);
+  // 椭圆形轮廓点集
+  for (unsigned int i = 0; i < points_num_; ++i) {
+    std::uniform_real_distribution<> point_x(-halfWidth, halfWidth);
+    std::uniform_real_distribution<> point_y(-halfHeight, halfHeight);
+    //正态分布噪声
+    std::normal_distribution<float> noise_x(0.0f, sdev_);
+    std::normal_distribution<float> noise_y(0.0f, sdev_);
+    obs_points(i, 0) = point_x(gen) + noise_x(gen);
+    obs_points(i, 1) = point_y(gen) + noise_y(gen);
   }
-  obs_show_ = make_pair(obs_x, obs_y);
+  origin_obs_points_ = obs_points;
 }
 
 /*更新障碍物信息*/
@@ -221,12 +220,12 @@ void Obstacle::CoutourObsUpdate() {
     return;
   }
   // step01->更新障碍物位姿
-  // UpdateObsState();
+  UpdateObsState();
   // step02->障碍物点云更新
-  // ObsTransform();
+  ObsTransform();
 }
 
-Void Obstacle::GenerateEllisoidObs() {
+void Obstacle::GenerateEllisoidObs() {
   // use a linespace to have a full rotation angle betweent [-pi, pi]
   vector<float> alpha = mathTools::linspace(-M_PI, M_PI, points_num_);
   Eigen::MatrixXf obs_points(points_num_, 2);
@@ -245,22 +244,6 @@ void Obstacle::GenerateRectangleVertexObs() {
   Eigen::MatrixXf obs_points(5, 2);
   obs_points << halfWidth, halfHeight, -halfWidth, halfHeight, -halfWidth, -halfHeight, halfWidth, -halfHeight, halfWidth, halfHeight;
   origin_obs_points_ = obs_points;
-}
-
-/*更新障碍物运动状态*/
-void Obstacle::UpdateObsState() {
-  center_pose_.x += dt_ * obs_vel_.linear * sin(center_pose_.theta);
-  center_pose_.y += dt_ * obs_vel_.linear * cos(center_pose_.theta);
-  center_pose_.theta += dt_ * obs_vel_.angular;
-}
-
-//障碍物更新
-void Obstacle::ObsUpdate() {
-  if (data_type_ == DataType::COUNTOUR) {
-    CoutourObsUpdate();
-  } else if (data_type_ == DataType::COUNTOURCLOUD) {
-    CloudObsUpdate();
-  }
 }
 
 void Obstacle::GenerateRandomShapeObs() {
@@ -288,6 +271,47 @@ void Obstacle::GenerateRandomShapeObs() {
   }
   origin_obs_points_ = obs_points;
 }
+
+/*更新障碍物运动状态*/
+void Obstacle::UpdateObsState() {
+  center_pose_.x += dt_ * obs_vel_.linear * sin(center_pose_.theta);
+  center_pose_.y += dt_ * obs_vel_.linear * cos(center_pose_.theta);
+  center_pose_.theta += dt_ * obs_vel_.angular;
+}
+
+// 障碍物点坐标系变换
+void Obstacle::ObsTransform() {
+  // 坐标系转换矩阵
+  Eigen::Matrix<float, 2, 3> transformationMatrix;
+  transformationMatrix << cos(center_pose_.theta), -sin(center_pose_.theta), center_pose_.x, sin(center_pose_.theta), cos(center_pose_.theta),
+      center_pose_.y;
+  // 轮廓点矩阵变形
+  Eigen::MatrixXf pointsWithOnes(origin_obs_points_.rows(), origin_obs_points_.cols() + 1);
+  pointsWithOnes << origin_obs_points_, Eigen::MatrixXf::Ones(origin_obs_points_.rows(), 1);
+  // 坐标系变换(local to global)
+  Eigen::MatrixXf globalPoints = pointsWithOnes * transformationMatrix.transpose();
+  // 更新障碍物轮廓
+  obs_points_ = globalPoints;
+  // 显示障碍物与外发计算数据格式
+  vector<float> obs_x(obs_points_.rows()), obs_y(obs_points_.rows());
+  trans_obs_points_.clear();
+  for (int i = 0; i < obs_points_.rows(); i++) {
+    trans_obs_points_.push_back(obs_points_.row(i));
+    obs_x[i] = obs_points_(i, 0);
+    obs_y[i] = obs_points_(i, 1);
+  }
+  obs_show_ = make_pair(obs_x, obs_y);
+}
+
+//障碍物更新
+void Obstacle::ObsUpdate() {
+  if (data_type_ == DataType::COUNTOUR) {
+    CoutourObsUpdate();
+  } else if (data_type_ == DataType::COUNTOURCLOUD) {
+    CloudObsUpdate();
+  }
+}
+
 }  // namespace env
 }  // namespace modules
 }  // namespace modules

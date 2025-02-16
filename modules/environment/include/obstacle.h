@@ -79,5 +79,6 @@ class Obstacle {
   pair<vector<float>, vector<float>> GetObsToPlot() { return obs_show_; }
   vector<Eigen::Vector2f> GetUpdatedObs() { return trans_obs_points_; }
 };
+
 }  // namespace env
 }  // namespace modules

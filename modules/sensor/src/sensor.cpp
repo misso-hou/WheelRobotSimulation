@@ -86,7 +86,7 @@ vector<vector<float>> LidarSensor::ObsDetectByReflect(const port::CommonPose& se
         if (dist < min_dist) {
           min_dist = dist;
           lidar_data_[0][i] = bg::get<0>(point);
-          lidar_data_[i][i] = bg::get<1>(point);
+          lidar_data_[1][i] = bg::get<1>(point);
         }
       }
       //转到局部坐标系

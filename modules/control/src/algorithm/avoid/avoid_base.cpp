@@ -1,4 +1,5 @@
 #include "algorithm/avoid/avoid_base.h"
+
 #include "tools/math_tools.h"
 
 namespace modules {
@@ -8,7 +9,7 @@ namespace avoid_base {
 
 namespace mathTools = utilities::mathTools;
 
-datacenter::DataCenter *DC_Instance = datacenter::DataCenter::GetInstance();
+datacenter::DataCenter* DC_Instance = datacenter::DataCenter::GetInstance();
 
 //全局变量定义
 port::CommonPose g_robot_pose;
@@ -29,7 +30,7 @@ vector<vector<port::ClusterPoint>> g_cluster_groups;
 vector<port::CircleAgent> g_agents;
 Method g_method;
 //用于可视化debug的功能数据(不参与计算)
-Eigen::Vector3f g_glanning_vel;
+Eigen::Vector3f g_planning_vel;
 vector<vec2f> g_nearest_points;
 vector<vec2f> g_obs_centers;
 
@@ -39,7 +40,7 @@ void ResetAvoidBaseData() {
   g_virtual_obs.clear();
   g_nearest_points.clear();
   g_obs_centers.clear();
-  for (auto &agent : g_agents) {
+  for (auto& agent : g_agents) {
     agent.ref_vel_vec = vec2f(0, 0);
     agent.compound_vel = vec2f(0, 0);  // 矢量合成modulate速度
     agent.debug01_vec = vec2f(0, 0);
@@ -54,11 +55,11 @@ void ResetAvoidBaseData() {
   g_planning_vel << 0.0, 0.0, 1.0;
 }
 
-void Init(const port::SampleCircle &circle, const vector<port::BoundaryCircle> &circles, const Method &md) {
+void Init(const port::SampleCircle& s_circle, const vector<port::BoundaryCircle>& circles, const Method& md) {
   // 射线采样圆
-  g_circle = circle;
-  g_circle.local_center << circle.center_x, circle.center_y;
-  g_circle.jacobian << 1.0f, -circle.center_y, 0.0f, circle.center_x;
+  g_circle = s_circle;
+  g_circle.local_center << s_circle.center_x, s_circle.center_y;
+  g_circle.jacobian << 1.0f, -s_circle.center_y, 0.0f, s_circle.center_x;
   // 虚拟轮廓圆
   g_agents.resize(circles.size());
   for (int i = 0; i < circles.size(); i++) {
@@ -82,3 +83,8 @@ void UpdateInfo() {
   DC_Instance->SetAvoidVirtualObs(g_virtual_obs);
   DC_Instance->SetAvoidPlanningVel(g_planning_vel);
 }
+
+}  // namespace avoid_base
+}  // namespace algorithm
+}  // namespace control
+}  // namespace modules

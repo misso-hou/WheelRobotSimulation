@@ -90,12 +90,12 @@ void Logger::TrackingDataRecord() {
   }
   vector<float> data = {robot_pose_.x,
                         robot_pose_.y,
-                        robot_pose_.theta,  // 记录轨迹
+                        robot_pose_.theta,  //记录轨迹
                         duration_time_,
                         error_,  //记录时间戳(主线程频率50HZ)和误差
                         linear_speed_,
-                        angular_speed_,  //	记录速度
-                        target_pose_x,   //记录跟踪目标点
+                        angular_speed_,  //记录速度
+                        target_pose_.x,   //记录跟踪目标点
                         target_pose_.y,
                         path_recorder_count_,
                         observe_v_,  //反馈速度记录
@@ -125,7 +125,7 @@ void Logger::ObsDataRecord() {
   obs_recorder.open(obs_file, ios::app);  // 以追加形式打开csv文件
   /*写入时间同步定位*/
   obs_recorder << time_sync_pose_.x << "," << time_sync_pose_.y << "," << time_sync_pose_.theta << endl;
-  /*写入传感器碍物数据*/
+  /*写入传感器障碍物数据*/
   if (sensor_obs_.empty()) {
     obs_recorder << 0.0 << "," << 0.0 << endl;
   } else {
@@ -244,7 +244,6 @@ void Logger::GetObsData() {
   }
   //删格地图障碍物数据
   auto map_obs_points = DC_Instance->GetMapObs();
-  ;
   for (auto point : map_obs_points) {
     //机器人坐标系
     grid_map_obs_.push_back(ObsPoint(point(0), point(1)));

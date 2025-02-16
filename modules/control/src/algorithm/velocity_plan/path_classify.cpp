@@ -48,7 +48,7 @@ vector<port::DangerousBorder> PathClassify::DangerousBorderClassify(const vector
   /*将遍历剩余未归类的危险边界进行归类*/
   if (!temp_border.origin_index.empty()) {
     danger_borders.push_back(temp_border);
-    // show_temp_index.insert(show_temp_index.end(), temp_border.origin_index.begin(), temp_border.origin_index.end()) ；
+    // show_temp_index.insert(show_temp_index.end(), temp_border.origin_index.begin(), temp_border.origin_index.end())；
   }
   /*提取需要显示的危险边界路段*/
   // for (uint i = 0; i < show_temp_index.size(); i++) {
@@ -132,6 +132,7 @@ vector<port::PathCurve> PathClassify::CurveClassify(const vector<port::CommonPos
       }
       memset(&temp_line, 0, sizeof(temp_line));
     }
+
     if (line_flag) {
       temp_line.curve.push_back(smooth_path[i]);  // 累计直线点
       temp_line.origin_index.push_back(i);        // 累计直线点对应的原始路径索引
@@ -176,7 +177,7 @@ vector<port::PathCurve> PathClassify::CurveClassify(const vector<port::CommonPos
         else {
           //短曲线，插入到新直线前段
           if ((int)temp_curve.curve.size() < adjust_index_) {
-            temp_line = temp_curve;  // 此时新直线还 未罗列点,直接将短曲线设置为直线类型
+            temp_line = temp_curve;  // 此时新直线还未罗列点,直接将短曲线设置为直线类型
           }
           //长曲线,长曲线归档
           else {
@@ -208,14 +209,14 @@ void PathClassify::CalSharpCurveV(vector<port::PathCurve>& curves) {
     switch (method) {
       // method01->根据曲率计算速度(根据离心力计算,忽略拼接路径)
       case 0: {
-        limit_v = sqrtf(friction_factor * G / fabs(curves[i].curvature));
+        limit_v = sqrtf(friction_factor_ * G / fabs(curves[i].curvature));
         curves[i].limit_v = max(min_curve_v_, limit_v);  // 约束最小曲线跟踪速度,防止速度过低
         break;
       }
       // method02->根据曲率计算速度(复杂曲线设定固定跟踪速度)
       case 1: {
         if (curves[i].type == port::CurveType::simple_curve) {
-          limit_v = sqrtf(friction_factor * G / fabs(curves[i].curvature));
+          limit_v = sqrtf(friction_factor_ * G / fabs(curves[i].curvature));
           curves[i].limit_v = limit_v;
         } else {
           curves[i].limit_v = compound_curve_limit_v_;
@@ -233,11 +234,11 @@ void PathClassify::CalSharpCurveV(vector<port::PathCurve>& curves) {
   }
 }
 
-/*
+/**
  *@brief:从提取出来的曲线路径进一步提取出sharp curve曲线段
  *@param:
  *   curves:原始路径上的曲线路段
- *@return
+ *@return:
  *   sharp_curves:急转弯曲线段
  */
 vector<port::PathCurve> PathClassify::ExtractSharpCurves(vector<port::PathCurve>& curves) {
@@ -253,7 +254,7 @@ vector<port::PathCurve> PathClassify::ExtractSharpCurves(vector<port::PathCurve>
       Ko_pc = (PCp.x - PC.x) / (PC.y - PCp.y);
       Ko_pt = (PTp.x - PT.x) / (PT.y - PTp.y);
       // !!!:临时增加方案解决空值bug
-      if (PCp.x - PC.x = 0 || PTp.x - PT.x == 0 || PC.y - PCp.y == 0 || PT.y - PTp.y == 0) {
+      if (PCp.x - PC.x == 0 || PTp.x - PT.x == 0 || PC.y - PCp.y == 0 || PT.y - PTp.y == 0) {
         PC = curve.curve[2];
         PT = curve.curve[(curve.curve.size() - 3)];
         Ko_pc = (PCp.x - PC.x) / (PC.y - PCp.y);
@@ -262,7 +263,7 @@ vector<port::PathCurve> PathClassify::ExtractSharpCurves(vector<port::PathCurve>
       Bo_pc = PC.y - PC.x * Ko_pc;
       Bo_pt = PT.y - PT.x * Ko_pt;
       Xo = (Bo_pt - Bo_pc) / (Ko_pc - Ko_pt);
-      YO = Ko_pc * Xo + Bo_pc;
+      Yo = Ko_pc * Xo + Bo_pc;
       R = sqrtf(powf((PC.x - Xo), 2) + powf((PC.y - Yo), 2));
       C = sqrtf(powf((PT.x - PC.x), 2) + powf((PT.y - PC.y), 2));
       //!!!:计算方式存在一定问题，反三角函数值可能有问题
@@ -286,13 +287,14 @@ vector<port::PathCurve> PathClassify::ExtractSharpCurves(vector<port::PathCurve>
   return sharp_curves;
 }
 
-void PathClassify::PlanningTrajectroy(const vector<port::CommonPose>& path) {
-  // trajectory速度预设 traj_path_.clear();
+void PathClassify::PlanningTrajectory(const vector<port::CommonPose>& path) {
+  // trajectory速度预设
+  traj_path_.clear();
   int point_num = path.size();
   traj_path_.resize(point_num);
   //期望路径点位姿&最大跟踪速度填值
   for (int i = 0; i < point_num; i++) {
-  port: :CommonPosie traj_pose;
+    port::CommonPose traj_pose;
     traj_pose.x = path[i].x;
     traj_pose.y = path[i].y;
     if (i >= 0) {
@@ -303,7 +305,7 @@ void PathClassify::PlanningTrajectroy(const vector<port::CommonPose>& path) {
   //急转弯路段速度信息提取
   for (auto curve : curves_) {
     //增加弯道前后速度缓冲区
-    int start_index = max(0, curve.origin_index.front() - (int)(base::k_task_.ref_cmd.Iinear * base::k_ct_.out_curve_dis_thd_));
+    int start_index = max(0, curve.origin_index.front() - (int)(base::k_task_.ref_cmd.linear * base::k_ct_.out_curve_dis_thd_));
     int end_index = min(point_num, curve.origin_index.back() + (int)(base::k_task_.ref_cmd.linear * base::k_ct_.out_curve_dis_thd_));
     for (int i = start_index; i < end_index; i++) {
       traj_path_[i].ref_v = min(traj_path_[i].ref_v, curve.limit_v);
@@ -322,7 +324,7 @@ void PathClassify::PlanningTrajectroy(const vector<port::CommonPose>& path) {
     }
   }
   //期望轨迹点相对时间计算
-  for (int i = i; i < traj_path_.size(); i++) {
+  for (int i = 1; i < traj_path_.size(); i++) {
     float pre_v = traj_path_[i - 1].ref_v;
     float next_v = traj_path_[i].ref_v;
     port::CommonPose pre_point = traj_path_[i - 1].pose;
@@ -335,7 +337,7 @@ void PathClassify::PlanningTrajectroy(const vector<port::CommonPose>& path) {
     float acc_y_max = 0.8f;
     float eps = 0.0000001f;
     if (i < traj_path_.size() - 2 && i > 1) {
-    port: :CommonPose pre_point = path[i - 2];
+      port::CommonPose pre_point = path[i - 2];
       port::CommonPose cur_point = path[i];
       port::CommonPose next_point = path[i + 2];
       float dis_01 = mathTools::PointsDis(cur_point, pre_point);

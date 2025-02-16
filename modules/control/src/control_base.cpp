@@ -3,7 +3,7 @@
 #include <iostream>
 
 #include "algorithm/track/pid.h"
-#include "algorithm/velocity_plan/velocity_planning.h'
+#include "algorithm/velocity_plan/velocity_planning.h"
 #include "common_port/data_port.h"
 
 namespace modules {
@@ -12,8 +12,9 @@ namespace base {
 
 datacenter::DataCenter* DC_Instance = datacenter::DataCenter::GetInstance();
 algorithm::VelocityPlanner* VP_Instance = algorithm::VelocityPlanner::GetInstance();
+
 //控制器约束参数
-port::ControlParam k_cp_;   // 控制参数
+port::ControlParam k_cp_;   //控制参数
 port::CtrlThreshold k_ct_;  //控制约束阈值
 //控制模块公共参数
 port::CommonPose k_robot_pose_;

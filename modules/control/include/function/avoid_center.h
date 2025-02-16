@@ -11,7 +11,7 @@ namespace modules {
 namespace control {
 namespace function {
 
-using vec2f = Eigen::vector2f;
+using vec2f = Eigen::Vector2f;
 
 class AvoidCenter {
  public:
@@ -27,7 +27,7 @@ class AvoidCenter {
   void ShutdownAvoid();
   void SetTrackingPath(const vector<port::CommonPose>& path);
   void SetRealTimeInfo(const vec2f& ref_vel, const int goal_id);
-  int32_t AvoidTheadFun();
+  int32_t AvoidThreadFun();
   port::Twist GetAvoidCmd();
   int GetAvoidGoalId();
   port::Twist PoseControl(const port::CommonPose& robot_pose, const port::CommonPose target_pose, const port::Twist target_cmd);

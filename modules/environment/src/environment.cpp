@@ -13,10 +13,10 @@ void Environment::InitEnv(int obs_num, const port::CommonPose& pose) {
   std::random_device rd;
   std::mt19937 gen(rd());
   //设置分布范围
-  std::uniform_int_distribution pose_x_dis(3, 10);
-  std::uniform_int_distribution pose_y_dis(-6, 6);
-  std::uniform_int_distribution theta_dis(-M_PI, M_PI);
-  std::uniform_int_distribution dir_dis(0, 1);
+  std::uniform_int_distribution<> pose_x_dis(3, 10);
+  std::uniform_int_distribution<> pose_y_dis(-6, 6);
+  std::uniform_int_distribution<> theta_dis(-M_PI, M_PI);
+  std::uniform_int_distribution<> dir_dis(0, 1);
   for (int i = 0; i < obs_num; i++) {
     Obstacle local_obs;
     switch (i) {
@@ -29,6 +29,7 @@ void Environment::InitEnv(int obs_num, const port::CommonPose& pose) {
         local_obs.SetRectangleObsParam(5.0, 2.0, 0.1f);
         break;
       }
+
       case 0: {
         float local_x = pose.x + (2 * dir_dis(gen) - 1) * pose_x_dis(gen);
         float local_y = pose.y + pose_y_dis(gen);
@@ -37,6 +38,7 @@ void Environment::InitEnv(int obs_num, const port::CommonPose& pose) {
         local_obs.SetEllipsoidAxis({2.0f, 1.0f}, 15, 0.0f);
         break;
       }
+
       case 3: {
         float local_x = pose.x + (2 * dir_dis(gen) - 1) * pose_x_dis(gen);
         float local_y = pose.y + pose_y_dis(gen);
@@ -46,6 +48,7 @@ void Environment::InitEnv(int obs_num, const port::CommonPose& pose) {
         local_obs.SetRectangleObsParam(2.2, 2.2, 0.1f);
         break;
       }
+
       case 1: {
         float local_x = pose.x + (2 * dir_dis(gen) - 1) * pose_x_dis(gen);
         float local_y = pose.y + pose_y_dis(gen);
@@ -54,6 +57,7 @@ void Environment::InitEnv(int obs_num, const port::CommonPose& pose) {
         local_obs.SetRectangleObsParam(5.0, 2.0, 0.1f);
         break;
       }
+
       case 4: {
         float local_x = pose.x + (2 * dir_dis(gen) - 1) * pose_x_dis(gen);
         float local_y = pose.y + pose_y_dis(gen);
@@ -62,11 +66,12 @@ void Environment::InitEnv(int obs_num, const port::CommonPose& pose) {
         local_obs.SetRandomObsParam(1.0f, 6, 10);
         break;
       }
+
       case 5: {
         float local_x = pose.x + (2 * dir_dis(gen) - 1) * pose_x_dis(gen);
         float local_y = pose.y + pose_y_dis(gen);
         float local_yaw = pose.theta + theta_dis(gen);
-        local_obs.SetObsProperty(ObsType::RANDOM, DataType::COUNTOUR,port::CommonPose(local_x, local_y, local_yaw,port::Twist(0.fz 0.f),0.01f);
+        local_obs.SetObsProperty(ObsType::RANDOM, DataType::COUNTOUR, port::CommonPose(local_x, local_y, local_yaw), port::Twist(0.f, 0.f), 0.01f);
         local_obs.SetRandomObsParam(1.0f, 6, 10);
         break;
       }
@@ -111,7 +116,7 @@ void Environment::InitEnv(int obs_num, const port::CommonPose& pose) {
         float local_x = pose.x + (2 * dir_dis(gen) - 1) * pose_x_dis(gen);
         float local_y = pose.y + pose_y_dis(gen);
         float local_yaw = pose.theta + theta_dis(gen);
-        local_obs.SetObsProperty(ObsType : : RANDOM, DataType::COUNTOUR, port::CommonPose(local_x, local_y, local_yaw), port::Twist(0.f, 0.f), 0.f);
+        local_obs.SetObsProperty(ObsType::RANDOM, DataType::COUNTOUR, port::CommonPose(local_x, local_y, local_yaw), port::Twist(0.f, 0.f), 0.f);
         local_obs.SetRandomObsParam(1.0f, 6, 10);
         break;
       }
@@ -147,7 +152,9 @@ void Environment::EnvUpdate() {
     obs_points_cloud_.insert(obs_points_cloud_.end(), one_obs_points.begin(), one_obs_points.end());
   }
 }
+
 vector<pair<vector<float>, vector<float>>> Environment::GetShowObs() { return show_obs_; }
+
 vector<Eigen::Vector2f> Environment::GetObsPoints() { return obs_points_cloud_; }
 
 }  // namespace env

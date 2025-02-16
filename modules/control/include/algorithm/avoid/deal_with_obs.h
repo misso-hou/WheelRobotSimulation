@@ -32,6 +32,7 @@ class DealWithObs {
   int points_min_num_;   // minimum number of cluster
   int epsilon_;          // distance for clustering, metre^2
   int interpolate_dis_;  // 样条插值距离 //todo:疏松->影响切线稳定性，稠密->影响计算效率，寻找更高效方式
+
  private:
   vvec2f ExtractInBoundaryObs(const vvec2f& obs_points);
   int CalSampledPoints(const vvec2f& obs_points);

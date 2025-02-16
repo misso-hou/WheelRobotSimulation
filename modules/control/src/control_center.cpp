@@ -1,5 +1,6 @@
+#include "control_center.h"
+
 #include "control_base.h"
-#include "control_center_new.h"
 
 namespace modules {
 namespace control {
@@ -28,7 +29,7 @@ void ControlCenter::Init() {
   base::k_ct_.arrival_accuracy_thd = 0.1;  // 到点精度设置
   base::k_ct_.out_curve_dis_thd_ = 25;     // 出弯道不加速距离阈值(路径点数)
   base::k_ct_.short_path_thd_ = 10;        // 短路径判断(少于设定阈值，路径不分类)
-  base::k_ct_.overtime_thd_ = 10;          // 终点跟踪超时阈值设置(s))
+  base::k_ct_.overtime_thd_ = 10;          // 终点跟踪超时阈值设置(s)
   //功能模块初始化
   base::VP_Instance->Init(base::k_cp_, base::k_ct_);
   tracker_ptr_ = make_shared<func::PathTracker>();
@@ -99,7 +100,7 @@ port::TrackingInternalState ControlCenter::TaskAllocation() {
     default:
       task_state = port::TrackingInternalState::INIT;
       base::k_cmd_ = port::Twist{};
-      base::k_csv_switch_ = false;  // 无控制任务-＞停止数据记录
+      base::k_csv_switch_ = false;  // 无控制任务->停止数据记录
       break;
   }
   return task_state;

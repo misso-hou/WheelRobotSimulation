@@ -74,7 +74,7 @@ float StanleyController::CalculateEFA(const port::CommonPose& robot_pose) {
   return -errorFrontAxle;
 }
 
-/*
+/**
  *@brief:计算后轮中心的横向误差
  * @return:
  *   lateral_error:横向跟踪误差(后轮中心)
@@ -99,7 +99,7 @@ float StanleyController::CalLateralError(const port::CommonPose& robot_pose, con
   return lateral_error;
 }
 
-/*
+/**
  *@brief:stanley控制器->转向角速度计算
  *@param:
  *   pose:机器人当前位姿
@@ -113,7 +113,7 @@ float StanleyController::StanleyControl(const port::CommonPose& robot_pose, cons
                                         const float& linearV, const float& maxV, const port::PlanType& plan_type) {
   float delta;  //下发角速度
   /*更新目标点，计算期望路径方向*/
-  int new_index = UpdateTargetIndex(robot_pose, path, targetId, linearV, maxV, 50);
+  int new_index = UpdateTargetIndex(robot_pose, path, targetIdx, linearV, maxV, 50);
   targetIdx = new_index;  //目标点更新(外部传值)
   // 路径在目标点处的方向
   float trajectYaw;

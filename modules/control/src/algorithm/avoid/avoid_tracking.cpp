@@ -51,9 +51,9 @@ void AvoidTracking::UpdateGoalPoint(const int goal_index) {
     /*条件二:目标点一定要在机器的正方向*/
     vec2f target_vec(path_point.x - ab::g_circle.global_center(0), path_point.y - ab::g_circle.global_center(1));
     // float target_robot_angle_cos = ab::g_circle.heading_dir.dot(target_vec);
-    // if(target_robot_angle_cos <= 0) {
-    // ab::g_goal_index = i;
-    // continue;
+    // if (target_robot_angle_cos <= 0) {
+    //   ab::g_goal_index = i;
+    //   continue;
     // }
     /*条件三:远离机器人本体(外接圆)一定距离的目标点*/
     float min_border_distance = target_vec.norm();
@@ -132,7 +132,7 @@ float AvoidTracking::CalVelocityEnvelope() {
 }
 
 /**
- * @brief:机器位姿控制(机身职能体控制中心)
+ * @brief:机器位姿控制(机身智能体控制中心)
  * @param:
  *      robot_pose:机器位姿
  *      target:目标位姿

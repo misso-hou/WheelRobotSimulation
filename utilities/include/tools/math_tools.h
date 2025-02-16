@@ -46,7 +46,7 @@ inline std::vector<float> linspace(float start, float end, int num) {
 }
 
 //函数生成网格坐标
-inline pair<mesh2D, mesh2D> meshgrid(const std::vector<float>& Aa, const std::vector<float> Ba) {
+inline pair<mesh2D, mesh2D> meshgrid(const std::vector<float>& Aa, const std::vector<float>& Ba) {
   size_t m = Aa.size();
   size_t n = Ba.size();
 

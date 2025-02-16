@@ -75,9 +75,9 @@ struct TaskThd {
 
 //规划任务场景
 typedef enum {
-  COVERCUT,  //	弓字
-  P2P,       //	p2p
-  SIDE       // 沿边
+  COVERCUT,  //弓字
+  P2P,       //p2p
+  SIDE       //沿边
 } PlanType;
 
 // 控制模块任务接口
@@ -203,7 +203,7 @@ typedef struct {
   uint index;            // 原点集中的索引
 } ClusterPoint;
 
-/*********算法数据类型定义***********/  // note:display tool与trackingsdk存在交叉编译问题
+/*********算法数据类型定义***********/
                                         //角度分区采样点
 struct SamplePoint {
   vec2f pose;       //位置

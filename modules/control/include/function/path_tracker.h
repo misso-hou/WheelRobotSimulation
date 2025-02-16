@@ -29,7 +29,7 @@ class PathTracker {
 
  public:
   PathTracker();
-  ~PathTracker(){};
+  ~PathTracker() {}
 
  public:
   void ResetPathTracker(const vector<port::CommonPose>& new_path, const CtrlALG& method);
