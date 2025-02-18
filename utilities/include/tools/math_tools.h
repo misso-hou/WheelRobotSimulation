@@ -186,8 +186,8 @@ inline int CalNearestPointIndexOnPath(const vector<port::CommonPose>& path, cons
     front_num = 0;
     back_num = path.size();
   } else {
-    front_num = (currrent_index - trim_num) > 0 ? (currrent_index - trim_num) : 0;
-    back_num = currrent_index > (int)(path.size() - trim_num) ? (int)path.size() : currrent_index + trim_num;
+    front_num = (current_index - trim_num) > 0 ? (current_index - trim_num) : 0;
+    back_num = current_index > (int)(path.size() - trim_num) ? (int)path.size() : current_index + trim_num;
   }
   /*遍历路径上特定范围的点，搜寻目标点(最近点)*/
   for (int i = front_num; i < back_num; i++) {

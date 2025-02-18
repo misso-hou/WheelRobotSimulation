@@ -136,3 +136,7 @@ float StanleyController::StanleyControl(const port::CommonPose& robot_pose, cons
   delta = mathTools::NormalizeAngle(thetaE + thetaD);
   return delta;
 }
+
+}  // namespace algorithm
+}  // namespace control
+}  // namespace modules

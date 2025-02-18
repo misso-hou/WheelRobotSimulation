@@ -46,7 +46,7 @@ class PathClassify {
   vector<port::PathCurve> CurveClassify(const vector<port::CommonPose>& smooth_path);
   vector<port::PathCurve> ExtractSharpCurves(vector<port::PathCurve>& curves);
   void CalSharpCurveV(vector<port::PathCurve>& curves);
-  void ConvertPltPath(const vector<port>::CommonPose > &path);
+  void ConvertPltPath(const vector<port::CommonPose>& path);
   void PlanningTrajectory(const vector<port::CommonPose>& path);
 
  public:

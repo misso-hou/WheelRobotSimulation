@@ -45,7 +45,8 @@ void SetRealTimeInfo() {
 
 port::TrackingInternalState Stop() {
   /*停车速度平滑*/
-  k_cmd_.linear = VP_Instance->VelocityPlanning(0.0f);
+  // k_cmd_.linear = VP_Instance->VelocityPlanning(0.0f);
+  k_cmd_.linear = VP_Instance->LinearSpeedSmooth(0.0f);
   k_cmd_.angular = VP_Instance->AngularSpeedSmooth(0.0f);
   /*状态判断*/
   if (k_last_cmd_.angular == 0.0f && k_last_cmd_.linear == 0.0f) {

@@ -6,6 +6,10 @@ project(simulator)
 find_package(OpenCV REQUIRED)
 find_package(Threads REQUIRED)
 
+find_package(Python3 COMPONENTS Interpreter Development)
+find_package(pybind11 REQUIRED)
+find_package(matplotlibcpp17 REQUIRED)
+
 # 设置 C++ 标准
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -20,13 +24,15 @@ file(MAKE_DIRECTORY ${CSV_OUTPUT_DIRECTORY})
 add_definitions(-DCSV_SOURCE_DIR="${CSV_OUTPUT_DIRECTORY}")
 add_definitions(-DPROJECT_DIR="${CMAKE_SOURCE_DIR}")
 # 仿真倍速
-add_definitions(-DSIMULATION_RATE=1)
+add_definitions(-DSIMULATION_RATE=10)
 
 #添加子模块
 add_subdirectory(modules)
 
 #在指定位置生成执行程序
+# include_directories(${OpenCV_INCLUDE_DIRS})
 add_executable(${PROJECT_NAME} src/main.cpp)
+# target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
 set_target_properties(${PROJECT_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${PROJECT_OUTPUT_DIRECTORY}"
 )
@@ -43,10 +49,13 @@ target_link_libraries(${PROJECT_NAME} vehicle)
 target_link_libraries(${PROJECT_NAME} gridmap)
 
 #外部库链接
+target_link_libraries(${PROJECT_NAME} ${Python3_LIBRARIES} pybind11::embed
+                      matplotlibcpp17::matplotlibcpp17)
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
 target_link_libraries(${PROJECT_NAME} Threads::Threads)
 
 #链接其他头文件
+target_include_directories(${PROJECT_NAME} PUBLIC  ${Python3_INCLUDE_DIRS})
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/utilities/include)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/modules/vehicle/include)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/modules/logger/include)

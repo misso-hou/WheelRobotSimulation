@@ -10,6 +10,7 @@
 #include "planning.h"
 #include "sensor.h"
 #include "simulant_robot.h"
+// #include <boost/geometry.hpp>
 
 using namespace utilities;
 using namespace modules;

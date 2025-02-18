@@ -66,7 +66,7 @@ class Logger : public utilities::Singleton<Logger> {
   float observe_v_;               //	实际线速度
   float observe_w_;               //	实际角速度
   float track_mode_;              //	控制模式
-  float map_command_;            //地图下发控制模式
+  float map_command_;             //地图下发控制模式
   port::CommonPose target_pose_;  // 目标点
   float error_;                   // 跟踪误差
   float pitch_;

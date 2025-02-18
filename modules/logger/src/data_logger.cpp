@@ -255,7 +255,7 @@ void Logger::LoggerLoop() {
   GetTrackingRecordData();
   if (csv_recorder_switch_) {
     TrackingDataRecord();
-    TimeConsumingRecord();
+    // TimeConsumingRecord();
   }
 }
 

@@ -221,10 +221,10 @@ bool KeyboardCtrl(int &index) {
     cout << "\033[32m 按 'c' 继续程序，'q' 退出程序。\33[0m" << endl;
     //等待用户输入
     char key = GetKey();
-    if (key == "c") {
+    if (key == 'c') {
       index = 0;
       erase_ = true;
-    } else if (key == "q") {
+    } else if (key == 'q') {
       cout << "!!!退出程序!!!" << endl;
       return false;  //按'q'退出循环
     } else {
@@ -244,7 +244,7 @@ void SetParam(int argc, char *argv[]) {
   // 设置播放速度(默认周期20ms)
   cycle_time_ = argc >= 2 ? stoi(argv[1]) : 10;
   // 播放位置设置（tick累计)
-  start_index = argc >= 3 ? atoi(argv[2]) : 0;
+  start_index_ = argc >= 3 ? atoi(argv[2]) : 0;
   // 指定文件夹序号(每个文件夹例如csv01,csv02...存放多组数据）
   file_path_ = argc >= 4 ? argv[3] : "";
   file_path_ = current_path + "/csvLog" + file_path_ + "/";

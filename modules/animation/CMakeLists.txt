@@ -3,9 +3,20 @@ project(animation)
 #外部库加载
 find_package(OpenCV REQUIRED)
 #新增加的可视化工具库
-set(pybind11_DIR "/usr/lib/cmake/pybind11")
+
+find_package(Python3 COMPONENTS Interpreter Development)
 find_package(pybind11 REQUIRED)
 find_package(matplotlibcpp17 REQUIRED)
+
+
+# set(pybind11_DIR "/usr/lib/cmake/pybind11")
+# find_package(pybind11 REQUIRED)
+# find_package(matplotlibcpp17 REQUIRED)
+# find_package(
+#     Python3
+#     COMPONENTS Interpreter Development
+#     REQUIRED
+# )
 
 #建立子库
 file(GLOB SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp) 
@@ -20,6 +31,8 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/modules/d
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/modules/vehicle/include)
 
 #外部库链接
+target_link_libraries(${PROJECT_NAME} ${Python3_LIBRARIES} pybind11::embed
+                      matplotlibcpp17::matplotlibcpp17)
 target_link_libraries(${PROJECT_NAME} datacenter)
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
 

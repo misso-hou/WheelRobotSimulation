@@ -3,11 +3,11 @@
 function RemoveFolder {
     CURRENT_DIR=$(pwd)
     echo "Current path is: $CURRENT_DIR"
-    Cd "$CURRENT_DIR/."
+    cd "$CURRENT_DIR/.."
     #检查build &件夹是否存在
     if [ -d "build" ]; then
         echo "Deleting existing build directory..."
-        sudo rm -r build
+        rm -r build
     fi
 }
 
@@ -23,7 +23,7 @@ function Compile {
     echo "Running CMake..."
     cmake ..
     #编译项目
-    make
+    make -j20
     echo "------Build completed-----" 
 }
 
@@ -44,7 +44,14 @@ format)
     Format
     ;;
 compile)
-    RemoveFolder CreateFolder Compile
+    RemoveFolder
+    CreateFolder 
+    Compile
+    ;;
+make)
+    cd ../build
+    make -j20
+    cd ../shell_script
     ;;
 *)
 ;;
