@@ -9,10 +9,11 @@
 
 #include "opencv2/opencv.hpp"
 
-namespace port = utilities::port;
-
 namespace utilities {
 namespace mathTools {
+
+using namespace std;
+namespace port = utilities::port;
 
 using mesh2D = std::vector<std::vector<float>>;
 using vec2f = Eigen::Vector2f;

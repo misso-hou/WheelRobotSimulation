@@ -44,12 +44,14 @@ format)
     Format
     ;;
 compile)
+    # Format
     RemoveFolder
     CreateFolder 
     Compile
     ;;
 make)
-    cd ../build
+    Format
+    cd build
     make -j20
     cd ../shell_script
     ;;

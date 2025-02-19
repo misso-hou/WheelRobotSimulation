@@ -595,11 +595,11 @@ void Animation::PlotSensorObs(const Scene& scene) {
  *	 offset:轴偏差
  */
 void Animation::SetEnvAxisLimit(const mesh2D& traj, const int ratio, float offset) {
-  //以机器为中心
-  offset = 10.f;
-  env_axes_ptr_->set_xlim(Args(robot_pose_.x - offset / 2, robot_pose_.x + offset / 2));
-  env_axes_ptr_->set_ylim(Args(robot_pose_.y - offset / (ratio * 2), robot_pose_.y + offset / (ratio * 2)));
-  return;
+  // //以机器为中心
+  // offset = 10.f;
+  // env_axes_ptr_->set_xlim(Args(robot_pose_.x - offset / 2, robot_pose_.x + offset / 2));
+  // env_axes_ptr_->set_ylim(Args(robot_pose_.y - offset / (ratio * 2), robot_pose_.y + offset / (ratio * 2)));
+  // return;
   /*********step01->计算x/y轴数据边界**********/
   // 原始axis边界
   auto axes_xlim = env_axes_ptr_->get_xlim();

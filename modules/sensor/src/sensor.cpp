@@ -1,24 +1,24 @@
 #include "sensor.h"
 
-// #include <boost/geometry.hpp>
-// #include <boost/geometry/geometries/point.hpp>
-// #include <boost/geometry/geometries/polygon.hpp>
+#include <boost/geometry.hpp>
+#include <boost/geometry/geometries/point.hpp>
+#include <boost/geometry/geometries/polygon.hpp>
 #include <opencv2/opencv.hpp>
 
 #include "robot_configuration.h"
 #include "tools/math_tools.h"
 
+namespace modules {
+namespace sensor {
+
 using namespace modules;
 namespace mathTools = utilities::mathTools;
 // boost几何计算库
-// namespace bg = boost::geometry;
-// typedef bg::model::d2::point_xy<float> Point;
-// typedef bg::model::polygon<Point> Polygon;
-// typedef bg::model::segment<Point> Segment;
-// typedef bg::model::linestring<Point> LineString;
-
-namespace modules {
-namespace sensor {
+namespace bg = boost::geometry;
+typedef bg::model::d2::point_xy<float> Point;
+typedef bg::model::polygon<Point> Polygon;
+typedef bg::model::segment<Point> Segment;
+typedef bg::model::linestring<Point> LineString;
 
 LidarSensor::LidarSensor(float res, float range) {
   range_ = range;
@@ -42,62 +42,62 @@ vector<vector<float>> LidarSensor::GetLidarData() { return lidar_data_; }
  *	  env_obs: 全局环境中的障碍物
  * @return: 射线分组内的障碍物点云
  */
-// vector<vector<float>> LidarSensor::ObsDetectByReflect(const port::CommonPose& sensor_pose,
-//                                                       const vector<pair<vector<float>, vector<float>>>& env_obs) {
-//   //障碍物轮廓提取
-//   vector<Polygon> obs_polygon(env_obs.size());
-//   for (uint i = 0; i < env_obs.size(); i++) {
-//     //(注意:障碍物顶点首尾相接，序号为0-1-2-3-0)
-//     for (uint j = 0; j < env_obs[i].first.size(); j++) {
-//       float point_x, point_y;
-//       point_x = env_obs[i].first[j];
-//       point_y = env_obs[i].second[j];
-//       bg::append(obs_polygon[i], Point(point_x, point_y));
-//     }
-//   }
-//   //雷达仿真可视化
-//   vector<vector<float>> obs_data(2);
-//   //雷达射线遍历
-//   for (uint i = 0; i < sector_num_; i++) {
-//     /*step01->定义射线*/
-//     Point ray_origin(sensor_pose.x, sensor_pose.y);  //射线起点
-//     float ray_angle = i * resolution_;
-//     ray_angle = mathTools::NormalizeAngle(ray_angle + sensor_pose.theta);
-//     float ray_end_x = sensor_pose.x + range_ * cos(ray_angle);
-//     float ray_end_y = sensor_pose.y + range_ * sin(ray_angle);
-//     Point ray_end(ray_end_x, ray_end_y);  //射线方向
-//     LineString ray;
-//     ray.push_back(ray_origin);
-//     ray.push_back(ray_end);
-//     /*step02->遍历障碍物->计算所有交点*/
-//     vector<Point> intersections;
-//     for (auto polygon : obs_polygon) {
-//       bg::intersection(ray, polygon, intersections);
-//     }
-//     /*step03->筛选最近交点*/
-//     if (intersections.empty()) {
-//       lidar_data_[0][i] = ray_end_x;
-//       lidar_data_[1][i] = ray_end_y;
-//     } else {
-//       //筛选最近点
-//       float min_dist = range_;
-//       for (auto point : intersections) {
-//         float dist = bg::distance(ray_origin, point);
-//         if (dist < min_dist) {
-//           min_dist = dist;
-//           lidar_data_[0][i] = bg::get<0>(point);
-//           lidar_data_[1][i] = bg::get<1>(point);
-//         }
-//       }
-//       //转到局部坐标系
-//       port::CommonPose g_obs_pose(lidar_data_[0][i], lidar_data_[1][i], 0.f);
-//       auto l_obs_pose = mathTools::Global2Rob(sensor_pose, g_obs_pose);
-//       obs_data[0].push_back(l_obs_pose.x);
-//       obs_data[1].push_back(l_obs_pose.y);
-//     }
-//   }
-//   return obs_data;
-// }
+vector<vector<float>> LidarSensor::ObsDetectByReflect(const port::CommonPose& sensor_pose,
+                                                      const vector<pair<vector<float>, vector<float>>>& env_obs) {
+  //障碍物轮廓提取
+  vector<Polygon> obs_polygon(env_obs.size());
+  for (uint i = 0; i < env_obs.size(); i++) {
+    //(注意:障碍物顶点首尾相接，序号为0-1-2-3-0)
+    for (uint j = 0; j < env_obs[i].first.size(); j++) {
+      float point_x, point_y;
+      point_x = env_obs[i].first[j];
+      point_y = env_obs[i].second[j];
+      bg::append(obs_polygon[i], Point(point_x, point_y));
+    }
+  }
+  //雷达仿真可视化
+  vector<vector<float>> obs_data(2);
+  //雷达射线遍历
+  for (uint i = 0; i < sector_num_; i++) {
+    /*step01->定义射线*/
+    Point ray_origin(sensor_pose.x, sensor_pose.y);  //射线起点
+    float ray_angle = i * resolution_;
+    ray_angle = mathTools::NormalizeAngle(ray_angle + sensor_pose.theta);
+    float ray_end_x = sensor_pose.x + range_ * cos(ray_angle);
+    float ray_end_y = sensor_pose.y + range_ * sin(ray_angle);
+    Point ray_end(ray_end_x, ray_end_y);  //射线方向
+    LineString ray;
+    ray.push_back(ray_origin);
+    ray.push_back(ray_end);
+    /*step02->遍历障碍物->计算所有交点*/
+    vector<Point> intersections;
+    for (auto polygon : obs_polygon) {
+      bg::intersection(ray, polygon, intersections);
+    }
+    /*step03->筛选最近交点*/
+    if (intersections.empty()) {
+      lidar_data_[0][i] = ray_end_x;
+      lidar_data_[1][i] = ray_end_y;
+    } else {
+      //筛选最近点
+      float min_dist = range_;
+      for (auto point : intersections) {
+        float dist = bg::distance(ray_origin, point);
+        if (dist < min_dist) {
+          min_dist = dist;
+          lidar_data_[0][i] = bg::get<0>(point);
+          lidar_data_[1][i] = bg::get<1>(point);
+        }
+      }
+      //转到局部坐标系
+      port::CommonPose g_obs_pose(lidar_data_[0][i], lidar_data_[1][i], 0.f);
+      auto l_obs_pose = mathTools::Global2Rob(sensor_pose, g_obs_pose);
+      obs_data[0].push_back(l_obs_pose.x);
+      obs_data[1].push_back(l_obs_pose.y);
+    }
+  }
+  return obs_data;
+}
 
 /**
  * @brief:功能描述：雷达射线障碍物点云识别(角度分区识别方式)
@@ -197,9 +197,9 @@ vector<Eigen::Vector2f> LidarSensor::UpdateAiSensor(const port::CommonPose& robo
   vector<float> obs_x, obs_y;
   // auto detected_obs = ObsDetectByAngle(robot_pose, env_obs);
   // TODO:测试Lidar射线数据
-  // auto detected_obs = ObsDetectByReflect(robot_pose, env_obs);
-  // obs_x = detected_obs[0];
-  // obs_y = detected_obs[1];
+  auto detected_obs = ObsDetectByReflect(robot_pose, env_obs);
+  obs_x = detected_obs[0];
+  obs_y = detected_obs[1];
   // 障碍物点处理->平移到局部坐标系+判断是否在ai vision范围内
   vector<Eigen::Vector2f> sim_ai_obs;  // 虚拟ai障碍物数据
   for (int i = 0; i < obs_x.size(); i++) {

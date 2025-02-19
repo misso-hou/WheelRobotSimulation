@@ -7,12 +7,10 @@
 
 #include "common_port/data_port.h"
 
-
-
 namespace modules {
 namespace gridmap {
 
-// using namespace std;
+using namespace std;
 namespace port = utilities::port;
 
 //地图内部数据类型定义

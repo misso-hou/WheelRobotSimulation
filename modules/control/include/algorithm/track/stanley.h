@@ -5,8 +5,6 @@
 
 #include "common_port/data_port.h"
 
-
-
 namespace modules {
 namespace control {
 namespace algorithm {

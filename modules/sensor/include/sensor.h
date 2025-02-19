@@ -6,10 +6,11 @@
 
 #include "common_port/data_port.h"
 
-namespace port = utilities::port;
-
 namespace modules {
 namespace sensor {
+
+using namespace std;
+namespace port = utilities::port;
 
 class LidarSensor {
  public:

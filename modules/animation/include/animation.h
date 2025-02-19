@@ -13,12 +13,13 @@
 #include "facilities/base_time_struct.h"
 #include "facilities/singleton.h"
 
+namespace modules {
+namespace animation {
+
+using namespace std;
 namespace py = pybind11;
 namespace mpl = matplotlibcpp17;
 namespace port = utilities::port;
-
-namespace modules {
-namespace animation {
 
 typedef enum { SIMULATION = 0, LOGGER } Mode;
 

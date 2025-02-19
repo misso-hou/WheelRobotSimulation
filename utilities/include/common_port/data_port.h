@@ -5,12 +5,10 @@
 #include <opencv2/opencv.hpp>
 #include <vector>
 
-using namespace std;
-
 namespace utilities {
 namespace port {
 
-// using namespace std;
+using namespace std;
 
 using vec2f = Eigen::Vector2f;
 using mat2f = Eigen::Matrix2f;

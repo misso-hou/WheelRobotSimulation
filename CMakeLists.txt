@@ -24,7 +24,7 @@ file(MAKE_DIRECTORY ${CSV_OUTPUT_DIRECTORY})
 add_definitions(-DCSV_SOURCE_DIR="${CSV_OUTPUT_DIRECTORY}")
 add_definitions(-DPROJECT_DIR="${CMAKE_SOURCE_DIR}")
 # 仿真倍速
-add_definitions(-DSIMULATION_RATE=10)
+add_definitions(-DSIMULATION_RATE=6)
 
 #添加子模块
 add_subdirectory(modules)

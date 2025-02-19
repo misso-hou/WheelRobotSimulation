@@ -6,13 +6,11 @@
 #include "common_port/data_port.h"
 #include "facilities/singleton.h"
 
-
-
 namespace modules {
 namespace control {
 namespace algorithm {
 
-// using namespace std;
+using namespace std;
 namespace port = utilities::port;
 
 class VelocityPlanner : public utilities::Singleton<VelocityPlanner> {
