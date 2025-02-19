@@ -11,6 +11,8 @@ namespace modules {
 namespace control {
 namespace base {
 
+namespace port = utilities::port;
+
 extern datacenter::DataCenter* DC_Instance;
 extern algorithm::VelocityPlanner* VP_Instance;  // velocity planner单例
 

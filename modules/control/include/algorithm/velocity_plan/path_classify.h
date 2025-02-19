@@ -6,12 +6,12 @@
 
 #include "common_port/data_port.h"
 
-using namespace std;
-namespace port = utilities::port;
-
 namespace modules {
 namespace control {
 namespace algorithm {
+
+using namespace std;
+namespace port = utilities::port;
 
 class PathClassify {
  private:

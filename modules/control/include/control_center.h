@@ -5,10 +5,12 @@
 #include "facilities/singleton.h"
 #include "function/path_tracker.h"
 
-namespace func = modules::control::function;
-
 namespace modules {
 namespace control {
+
+using namespace std;
+namespace port = utilities::port;
+namespace func = modules::control::function;
 
 class ControlCenter : public utilities::Singleton<ControlCenter> {
   friend class Singleton<ControlCenter>;

@@ -11,7 +11,6 @@
 #include "robot_configuration.h"
 #include "tools/math_tools.h"
 
-using namespace std;
 using namespace modules::datacenter;
 namespace mpl_patches = matplotlibcpp17::patches;
 namespace robot = modules::vehicle;

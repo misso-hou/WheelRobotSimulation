@@ -1,8 +1,5 @@
 #include "simulant_robot.h"
 
-using namespace std;
-using namespace cv;
-
 namespace modules {
 namespace vehicle {
 

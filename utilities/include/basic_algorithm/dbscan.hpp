@@ -11,11 +11,11 @@
 #define DBSCAN_SUCCESS 0
 #define DBSCAN_FAILURE -3
 
-using namespace std;
-namespace port = utilities::port;
-
 namespace utilities {
 namespace basicAlg {
+
+using namespace std;
+namespace port = utilities::port;
 
 class DBSCAN {
  public:

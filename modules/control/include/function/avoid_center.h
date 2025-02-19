@@ -11,6 +11,8 @@ namespace modules {
 namespace control {
 namespace function {
 
+using namespace std;
+namespace port = utilities::port;
 using vec2f = Eigen::Vector2f;
 
 class AvoidCenter {

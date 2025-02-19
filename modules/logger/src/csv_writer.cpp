@@ -1,7 +1,5 @@
 #include "csv_writer.h"
 
-using namespace std;
-
 namespace modules {
 namespace logger {
 

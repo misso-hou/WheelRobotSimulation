@@ -2,8 +2,6 @@
 
 #include <random>
 
-using namespace std;
-
 namespace modules {
 namespace env {
 

@@ -9,11 +9,12 @@
 #include "algorithm/velocity_plan/path_classify.h"
 #include "function/avoid_center.h"
 
-namespace algorithm = modules::control::algorithm;
-
 namespace modules {
 namespace control {
 namespace function {
+
+namespace port = utilities::port;
+namespace alg = modules::control::algorithm;
 
 //控制算法选项
 enum CtrlALG {
@@ -46,12 +47,12 @@ class PathTracker {
   void LateralControl();
 
  private:
-  shared_ptr<algorithm::PurePursuit> pp_ptr_;              //纯跟踪
-  shared_ptr<algorithm::StanleyController> stanley_ptr_;   // stanley跟踪控制器
-  shared_ptr<algorithm::PathClassify> path_classify_ptr_;  //路径分类
-  shared_ptr<algorithm::MPCController> mpc_ptr_;           // mpc控制器
-  shared_ptr<algorithm::PID> lateral_pid_ptr_;             //横向误差控制器
-  shared_ptr<AvoidCenter> avoid_;                          //避障功能单元
+  shared_ptr<alg::PurePursuit> pp_ptr_;              //纯跟踪
+  shared_ptr<alg::StanleyController> stanley_ptr_;   // stanley跟踪控制器
+  shared_ptr<alg::PathClassify> path_classify_ptr_;  //路径分类
+  shared_ptr<alg::MPCController> mpc_ptr_;           // mpc控制器
+  shared_ptr<alg::PID> lateral_pid_ptr_;             //横向误差控制器
+  shared_ptr<AvoidCenter> avoid_;                    //避障功能单元
 
  private:
   int goal_index_;                             //跟踪目标点索引

@@ -11,11 +11,11 @@
 #include "facilities/rate_controller.h"
 #include "facilities/singleton.h"
 
-using namespace std;
-namespace port = utilities::port;
-
 namespace modules {
 namespace logger {
+
+using namespace std;
+namespace port = utilities::port;
 
 using poses = vector<port::CommonPose>;
 

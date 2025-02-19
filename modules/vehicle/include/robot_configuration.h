@@ -3,10 +3,10 @@
 #include <iostream>
 #include <vector>
 
-using namespace std;
-
 namespace modules {
 namespace vehicle {
+
+using namespace std;
 
 using mesh2D = vector<vector<float>>;
 

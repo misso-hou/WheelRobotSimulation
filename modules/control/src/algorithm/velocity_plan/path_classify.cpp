@@ -3,11 +3,12 @@
 #include "control_base.h"
 #include "tools/math_tools.h"
 
-namespace mathTools = utilities::mathTools;
-
 namespace modules {
 namespace control {
 namespace algorithm {
+
+namespace port = utilities::port;
+namespace mathTools = utilities::mathTools;
 
 /**
  *@brief:延边复杂路径分类（危险边界）//todo:路径点类型

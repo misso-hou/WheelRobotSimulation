@@ -5,11 +5,11 @@
 
 #include "OsqpEigen/OsqpEigen.h"
 
-using namespace std;
-
 namespace modules {
 namespace control {
 namespace algorithm {
+
+using namespace std;
 
 void VelocityPlanner::Init(port::ControlParam cp, port::CtrlThreshold ct) {
   ctrl_param_ = cp;

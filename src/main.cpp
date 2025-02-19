@@ -12,6 +12,7 @@
 #include "sensor.h"
 #include "simulant_robot.h"
 
+using namespace std;
 using namespace utilities;
 using namespace modules;
 

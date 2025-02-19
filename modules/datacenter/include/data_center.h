@@ -7,11 +7,11 @@
 #include "common_port/data_port.h"
 #include "facilities/singleton.h"
 
-using namespace std;
-namespace port = utilities::port;
-
 namespace modules {
 namespace datacenter {
+
+using namespace std;
+namespace port = utilities::port;
 
 using poses = vector<port::CommonPose>;
 using mesh2D = vector<vector<float>>;

@@ -10,10 +10,10 @@
 #include <string>
 #include <vector>
 
-using namespace std;
-
 namespace modules {
 namespace logger {
+
+using namespace std;
 
 /*
  * @定义csv文件写入与读取类定义

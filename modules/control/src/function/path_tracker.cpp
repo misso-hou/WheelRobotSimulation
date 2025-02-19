@@ -6,12 +6,11 @@
 #include "data_center.h"
 #include "tools/math_tools.h"
 
-namespace mathTools = utilities::mathTools;
-namespace alg = algorithm;
-
 namespace modules {
 namespace control {
 namespace function {
+
+namespace mathTools = utilities::mathTools;
 
 PathTracker::PathTracker() {
   //横向pid控制器

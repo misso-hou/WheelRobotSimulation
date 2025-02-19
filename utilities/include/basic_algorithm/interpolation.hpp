@@ -4,10 +4,10 @@
 #include <cmath>
 #include <vector>
 
-using namespace std;
-
 namespace utilities {
 namespace basicAlg {
+
+using namespace std;
 
 class InterpolateTools {
  public:

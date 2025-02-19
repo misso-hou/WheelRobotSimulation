@@ -4,11 +4,11 @@
 
 #include "obstacle.h"
 
-using namespace std;
-namespace port = utilities::port;
-
 namespace modules {
 namespace env {
+
+using namespace std;
+namespace port = utilities::port;
 
 class Environment {
  public:

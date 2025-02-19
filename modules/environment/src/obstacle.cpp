@@ -5,11 +5,10 @@
 
 #include "tools/math_tools.h"
 
-using namespace std;
-namespace mathTools = utilities::mathTools;
-
 namespace modules {
 namespace env {
+
+namespace mathTools = utilities::mathTools;
 
 Obstacle::Obstacle(ObsType type, const port::CommonPose& pose, const port::Twist& vel, float dt) {
   obs_type_ = type;

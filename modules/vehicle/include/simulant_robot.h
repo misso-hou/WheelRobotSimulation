@@ -6,11 +6,11 @@
 
 #include "common_port/data_port.h"
 
-using namespace std;
-namespace port = utilities::port;
-
 namespace modules {
 namespace vehicle {
+
+using namespace std;
+namespace port = utilities::port;
 
 class SimulantRobot {
  public:

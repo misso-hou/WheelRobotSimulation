@@ -6,11 +6,11 @@
 
 #include "common_port/data_port.h"
 
-using namespace std;
-using namespace utilities;
-
 namespace modules {
 namespace vehicle {
+
+using namespace std;
+using namespace utilities;
 
 using state = Eigen::VectorXf;
 using input = Eigen::VectorXf;

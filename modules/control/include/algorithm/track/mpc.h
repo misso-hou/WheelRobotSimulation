@@ -12,13 +12,13 @@
 #include "common_port/data_port.h"
 #include "unicycle.h"
 
-using namespace std;
-namespace port = utilities::port;
-namespace vehicle = modules::vehicle;
-
 namespace modules {
 namespace control {
 namespace algorithm {
+
+using namespace std;
+namespace port = utilities::port;
+namespace vehicle = modules::vehicle;
 
 class MPCController {
  public:
