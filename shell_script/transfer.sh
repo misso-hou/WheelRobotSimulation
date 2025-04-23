@@ -37,10 +37,10 @@ cd $local_path
 #压缩程序
 function CompressFile {
   if [ -e "$compress_file" ]; then
-  rm "$compress_file"
-  echo "File '$compress_file' has been deleted."
+    rm "$compress_file"
+    echo "File '$compress_file' has been deleted."
   else
-  echo "File '$compress_file' dose not exist."
+    echo "File '$compress_file' dose not exist."
   fi
   echo "=== tar install orin ..."
   tar -cf $compress_file $package_path
@@ -53,22 +53,22 @@ function CompressFile {
 function DataTransfer {
   #step01->开启新新终端,通过ssh协议控制远程删除原压缩文件,并开启监听
   gnome-terminal -- bash -c "echo start_ssh_connection; sleep 2; \
-            #远程设备控制
-            $ssh_connect_mutual '
-              $sudo_su
-              # step01->删除原文件,接收新文件
-              echo #空行
-              echo !!!!delete_compressed_file!!!
-              cd $remote_target_path && rm -rf $compress_file
-              echo -----delete_finished------
-              echo '=== Listening for incoming data ...'
-              nc -l $transfer_port > $compress_file
-              # step02->文件接收完成，信息显示
-              echo '=== receiver md5sum info: '
-              md5sum $compress_file
-              sleep 2
-            ';
-        "
+    #远程设备控制
+    $ssh_connect_mutual '
+      $sudo_su
+      # step01->删除原文件,接收新文件
+      echo #空行
+      echo !!!!delete_compressed_file!!!
+      cd $remote_target_path && rm -rf $compress_file
+      echo -----delete_finished------
+      echo '=== Listening for incoming data ...'
+      nc -l $transfer_port > $compress_file
+      # step02->文件接收完成，信息显示
+      echo '=== receiver md5sum info:'
+      md5sum $compress_file
+      sleep 2
+    ';
+  "
   #step02->本地文件发送
   echo "=== sending data ..."
   sleep 3 #等待ssh远程开启监听(操作远程需要时间)
@@ -79,18 +79,18 @@ function DataTransfer {
 #连接机器,启动进程
 function StartAll {
   gnome-terminal -- bash -c "echo 'start ssh connection'; sleep 1; \
-          # ssh连接,启动进程
-          $ssh_connet '
-            # 远程控制命令
-            echo "$remote_password" | sudo -S su
-            echo
-            # 启动slam进程
-            cd /app/oem
-            sudo su -c './start.sh'
-            sudo su
-            bash -i';
-            exec bash
-        "
+    # ssh连接,启动进程
+    $ssh_connet '
+      # 远程控制命令
+      echo "$remote_password" | sudo -S su
+      echo
+      # 启动slam进程
+      cd /app/oem
+      sudo su -c './start.sh'
+      sudo su
+      bash -i';
+      exec bash
+  "
 }
 
 #解压文件,并启动程序
@@ -100,11 +100,11 @@ function Start {
     remote_md5=$(echo "$remote_md5" | awk '{print $1}')
     local local_md5=$(md5sum $compress_file | awk '{print $1}')
     if [ "$local_md5" = "$remote_md5" ]; then
-        echo '=== compress file matching ==='
-            else
-        echo -e '\033[0;31m!!!transfer file not matching!!!\033[0m'
-                echo '!!!can not start the machine!!!'
-        exit
+      echo '=== compress file matching ==='
+    else
+      echo -e '\033[0;31m!!!transfer file not matching!!!\033[0m'
+      echo '!!!can not start the machine!!!'
+      exit
     fi
 
   # 远程设备控制
@@ -125,23 +125,22 @@ function Start {
   StartPlanner
 }
     
-    
 #后缀选择
 case $1 in
 trans) #transfer
     CompressFile
     DataTransfer
-      ;;
+    ;;
 run) #run
     StartAll
     sleep 2
     StartPlanner
-      ;;
+    ;;
 transRun) #transfer and run
     CompressFile
     DataTransfer
     Start
     ;;
-    *)
+*)
 ;;
 esac
