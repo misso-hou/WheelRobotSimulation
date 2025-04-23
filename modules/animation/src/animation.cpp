@@ -167,7 +167,7 @@ void Animation::InitializePlt(const port::CommonPose& robot_pose, const Mode& mo
   //图框设置
   int fig_width, ratio;
   /***环境视图***/
-  fig_width = 10, ratio = 1;
+  fig_width = 8, ratio = 1;
   pybind11::dict env_kwargs("figsize"_a = py::make_tuple(ratio * fig_width, fig_width), "dpi"_a = 100, "tight_layout"_a = true,
                             "facecolor"_a = "lightgray");
   EnvPltInit(ratio, env_kwargs, robot_pose);
@@ -179,7 +179,7 @@ void Animation::InitializePlt(const port::CommonPose& robot_pose, const Mode& mo
   pybind11::dict map_kwargs("figsize"_a = py::make_tuple(ratio * fig_width, fig_width), "dpi"_a = 100, "tight_layout"_a = true);
   MapPltInit(map_kwargs, ratio, robot_pose);
   /***传感器监视器***/
-  pybind11::dict sensor_kwargs("figsize"_a = py::make_tuple(8, 8), "dpi"_a = 100, "tight_layout"_a = true, "facecolor"_a = "lavender");
+  pybind11::dict sensor_kwargs("figsize"_a = py::make_tuple(4, 4), "dpi"_a = 100, "tight_layout"_a = true, "facecolor"_a = "lavender");
   float offset = 11.f;
   SensorPltInit(sensor_kwargs, offset);
   /***三维监视器***/
@@ -594,8 +594,8 @@ void Animation::PlotSensorObs(const Scene& scene) {
  *	 offset:轴偏差
  */
 void Animation::SetEnvAxisLimit(const mesh2D& traj, const int ratio, float offset) {
-  // //以机器为中心
-  // offset = 10.f;
+  //以机器为中心
+  // offset = 15.f;
   // env_axes_ptr_->set_xlim(Args(robot_pose_.x - offset / 2, robot_pose_.x + offset / 2));
   // env_axes_ptr_->set_ylim(Args(robot_pose_.y - offset / (ratio * 2), robot_pose_.y + offset / (ratio * 2)));
   // return;
@@ -1210,7 +1210,7 @@ void Animation::SpaceRobot(const float& rate) {
  */
 void Animation::SurfaceVelPlanning(int T) {
   //画框基础参数设置
-  static int fig_width = 5;
+  static int fig_width = 3;
   static int ratio = 1;
   /******动画频率设置******/
   static int64_t last_sim_time_stamp = 0;
@@ -1230,8 +1230,8 @@ void Animation::SurfaceVelPlanning(int T) {
   if (once_flag) {
     once_flag = false;
     plt.show(Args(), Kwargs("block"_a = 0));
-    auto x_array = mathTools::linspace(0.0, 1.0, 100);
-    auto y_array = mathTools::linspace(0.0, 1.0, 100);
+    auto x_array = mathTools::linspace(0.0, 1.0, 35);
+    auto y_array = mathTools::linspace(0.0, 1.0, 35);
     auto [X, Y] = mathTools::meshgrid(x_array, y_array);
     auto Z = mathTools::computeZ(X, Y);
     // to numpy array (vector<vector> is converted to list of list)

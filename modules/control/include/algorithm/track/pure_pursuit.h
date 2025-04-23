@@ -13,15 +13,14 @@ namespace port = utilities::port;
 
 class PurePursuit {
  public:
-  PurePursuit(float klD, float lD, float min_ld) : kld_(klD), ld_(lD), min_ld_(min_ld) {}
-  int GetTargetIndex(const port::CommonPose& pose, const float& linear_v, const float& max_v, const vector<port::CommonPose>& path, const int index);
+  PurePursuit(float max_v, float lD, float min_ld) : max_v_(max_v), ld_(lD), min_ld_(min_ld) {}
+  int GetTargetIndex(const port::CommonPose& pose, const float& linear_v, const vector<port::CommonPose>& path, const int index);
 
-  float PurePursuitControl(const port::CommonPose& pose, const float& linear_v, const float& max_v, const vector<port::CommonPose>& points,
-                           int& targetIdx);
+  float PurePursuitControl(const port::CommonPose& pose, const float& linear_v, const vector<port::CommonPose>& points, int& targetIdx);
 
  private:
   float ld_;      //最大预瞄距离
-  float kld_;     //比例系数(暂时未使用)
+  float max_v_;   //比例系数(暂时未使用)
   float min_ld_;  //最小预瞄准距离
   float angAlpha_;
 };

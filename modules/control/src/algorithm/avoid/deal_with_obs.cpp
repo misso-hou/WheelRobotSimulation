@@ -22,14 +22,14 @@ DealWithObs::DealWithObs(int pmn, const float& eps, const float& idis) {
  * @brief:提取边界内的障碍物
  */
 vvec2f DealWithObs::ExtractInBoundaryObs(const vvec2f& obs_points) {
-  vvec2f in_boundary_obs;
-  for (auto obs_point : obs_points) {
-    double result = cv::pointPolygonTest(ab::g_cv_boundary, cv::Point2f(obs_point(0), obs_point(1)), false);
-    //边界内障碍物
-    if (result > 0) {
-      in_boundary_obs.push_back(obs_point);
-    }
-  }
+  vvec2f in_boundary_obs = obs_points;
+  // for (auto obs_point : obs_points) {
+  //   double result = cv::pointPolygonTest(ab::g_cv_boundary, cv::Point2f(obs_point(0), obs_point(1)), false);
+  //   //边界内障碍物
+  //   if (result > 0) {
+  //     in_boundary_obs.push_back(obs_point);
+  //   }
+  // }
   return in_boundary_obs;
 }
 

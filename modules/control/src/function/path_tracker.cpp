@@ -18,9 +18,9 @@ PathTracker::PathTracker() {
   // 路径分类(摩擦系数,短直线阈值，点角度变化阈值，短曲线阈值,最小曲线速度阈值)
   path_classify_ptr_ = make_shared<alg::PathClassify>(0.01f, 0.01f, 1.2f, 3, 0.2f);
   // 纯跟踪参数设置(速度比例系数,轴距,最小预瞄距离约束)
-  pp_ptr_ = make_shared<alg::PurePursuit>(0.0, 0.91, 0.4);
+  pp_ptr_ = make_shared<alg::PurePursuit>(1.5f, 0.91f, 0.35f);
   // stanley跟踪算法(横向误差比例系数\横向误差平滑系数\前后轮轴距(虚拟可调))
-  stanley_ptr_ = make_shared<alg::StanleyController>(2.0f, 0.0, 0.91f);
+  stanley_ptr_ = make_shared<alg::StanleyController>(2.0f, 0.0f, 0.91f);
   // mpc控制器
   auto vehicle =
       make_shared<modules::vehicle::Unicycle>(base::k_cp_.min_omega, base::k_cp_.max_omega, -base::k_cp_.angular_acc, base::k_cp_.angular_acc);
@@ -223,7 +223,7 @@ float PathTracker::Avoid() {
   /***step01->正常跟踪期望速度***/
   Eigen::Vector2f ref_v;
   ref_v(0) = base::k_cmd_.linear;
-  ref_v(1) = pp_ptr_->PurePursuitControl(base::k_robot_pose_, base::k_cmd_.linear, base::k_task_.ref_cmd.linear, path_, base::k_goal_index_);
+  ref_v(1) = pp_ptr_->PurePursuitControl(base::k_robot_pose_, base::k_cmd_.linear, path_, base::k_goal_index_);
   /***step02->避障模块调用***/
   avoid_->SetRealTimeInfo(ref_v, base::k_goal_index_);
   base::k_goal_index_ = avoid_->GetAvoidGoalId();
@@ -238,12 +238,12 @@ void PathTracker::ToPoseCtrl() {
   vec2f random_acc = vec2f::Random();
   static port::CommonPose virtual_pose = port::CommonPose(base::k_robot_pose_.x + 0.3f, base::k_robot_pose_.y, base::k_robot_pose_.theta);
   float dt = 0.02f;                      //系统tick时间
-  random_acc(0) = random_acc(0) * 0.4f;  // 0.8线加速度
+  random_acc(0) = random_acc(0) * 0.9f;  // 0.8线加速度
   random_acc(1) = random_acc(1) * 0.6f;  // 1.0角加速度
   static vec2f virtual_cmd;
   //虚拟速度生成
   virtual_cmd = virtual_cmd + dt * random_acc;
-  virtual_cmd(0) = std::max(-0.5f, std::min(0.8f, virtual_cmd(0)));
+  virtual_cmd(0) = std::max(-0.0f, std::min(0.8f, virtual_cmd(0)));
   virtual_cmd(1) = std::max(-0.5f, std::min(0.5f, virtual_cmd(1)));
   std::random_device rd;
   std::mt19937 gen(rd());
@@ -251,7 +251,7 @@ void PathTracker::ToPoseCtrl() {
   float pose_noise = noise(gen);
   pose_noise = std::max(-0.02f, std::min(0.02f, pose_noise));
   virtual_pose.x += virtual_cmd(0) * cos(virtual_pose.theta) * dt + pose_noise;
-  virtual_pose.y += virtual_cmd(1) * sin(virtual_pose.theta) * dt + pose_noise;
+  virtual_pose.y += virtual_cmd(0) * sin(virtual_pose.theta) * dt + pose_noise;
   virtual_pose.theta += virtual_cmd(1) * dt;
   port::Twist target_cmd = port::Twist(virtual_cmd(0), virtual_cmd(1));
   auto vel_cmd = avoid_->PoseControl(base::k_robot_pose_, virtual_pose, target_cmd);
@@ -263,7 +263,7 @@ void PathTracker::LateralControl() {
   float omega;
   switch (method_) {
     case CtrlALG::PP: {
-      omega = pp_ptr_->PurePursuitControl(base::k_robot_pose_, base::k_cmd_.linear, base::k_task_.ref_cmd.linear, path_, base::k_goal_index_);
+      omega = pp_ptr_->PurePursuitControl(base::k_robot_pose_, base::k_cmd_.linear, path_, base::k_goal_index_);
       break;
     }
     case CtrlALG::STANLEY: {

@@ -132,13 +132,13 @@ void PathPlanning(bool& update_flag) {
   if (update_flag) {
     auto start_pose = DC_Instance->GetRobotPose();
     // 曲线路径
-    // task_path = Path_Planner.PlanningCurvePath(start_pose,10,0.5f,6.f);
+    // task_path = Path_Planner.PlanningCurvePath(start_pose, 10, 0.5f, 6.f);
     // 直线路径
     // task_path = Path_Planner.PlanningStraightPath(start_pose,0.6f,20.0f);
     // 生成多目标点(方位控制)
     // task_path = Path_Planner.PlanningMultiTarget(start_pose,10.0f);
     // 椭圆轮廓路径
-    // task_path = Path_Planner.PlanningEllipPath(start_pose,6.0,3.0);
+    // task_path = Path_Planner.PlanningEllipPath(start_pose, 6.0, 3.0);
     if (task_path.empty()) {
       task_path = Path_Planner.PlanningEllipPath(start_pose, 12, 8);
       boundary = Path_Planner.GetBoundary();

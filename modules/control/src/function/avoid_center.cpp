@@ -14,7 +14,7 @@ AvoidCenter::AvoidCenter() {
   InitAvoidbase();
   //算法工具
   avt_ptr_ = make_shared<alg::AvoidTracking>();
-  dw_obs_ptr_ = make_shared<alg::DealWithObs>(5, 1.5f, 0.05f);
+  dw_obs_ptr_ = make_shared<alg::DealWithObs>(5, 2.5f, 0.05f);
   dyn_sys_ptr_ = make_shared<alg::DynamicSys>(0.2f, 7, 1.0f, 2.0f);
   //线程
   avoid_thread_ = std::thread([&]() { AvoidThreadFun(); });

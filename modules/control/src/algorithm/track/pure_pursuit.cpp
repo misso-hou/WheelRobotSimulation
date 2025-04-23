@@ -18,8 +18,7 @@ namespace algorithm {
  * @return:
  *   int:目标点索引
  */
-int PurePursuit::GetTargetIndex(const port::CommonPose& pose, const float& ref_v, const float& max_v, const vector<port::CommonPose>& path,
-                                const int index) {
+int PurePursuit::GetTargetIndex(const port::CommonPose& pose, const float& ref_v, const vector<port::CommonPose>& path, const int index) {
   vector<float> dist;  // Distance between Vehicle and Trajectory Points
   for (auto point : path) {
     dist.push_back(sqrtf(pow(pose.x - point.x, 2) + pow(pose.y - point.y, 2)));
@@ -32,8 +31,8 @@ int PurePursuit::GetTargetIndex(const port::CommonPose& pose, const float& ref_v
   float length = dist[index_new];
   // float newlD = (klD_ * ref_v) + lD_; // 新的预瞄距离计算
   // float new_ld = (ref_v / (2.0	* max_v)) * ld_;  // note:保证高速预瞄距离尽可能远,弯道(低速)预瞄准距离可以降到足够小
-  float new_ld = ref_v * ld_;
-  new_ld = max(min_ld_, new_ld);
+  float new_ld = (ref_v / max_v_) * ld_;
+  new_ld = min(ld_, new_ld);
   while ((new_ld > length) && (index_new < path.size() - 1)) {
     float x0 = path[index_new].x;
     float y0 = path[index_new].y;
@@ -52,9 +51,8 @@ int PurePursuit::GetTargetIndex(const port::CommonPose& pose, const float& ref_v
  * @return:
  *   omega:控制角速度
  */
-float PurePursuit::PurePursuitControl(const port::CommonPose& pose, const float& linear_v, const float& max_v, const vector<port::CommonPose>& path,
-                                      int& targetIdx) {
-  int index_new = GetTargetIndex(pose, linear_v, max_v, path, targetIdx);
+float PurePursuit::PurePursuitControl(const port::CommonPose& pose, const float& linear_v, const vector<port::CommonPose>& path, int& targetIdx) {
+  int index_new = GetTargetIndex(pose, linear_v, path, targetIdx);
   targetIdx = index_new;
   port::CommonPose target = (index_new < path.size() ? path[index_new] : path.back());  // 目标点获取
   angAlpha_ = atan2(target.y - pose.y, target.x - pose.x);

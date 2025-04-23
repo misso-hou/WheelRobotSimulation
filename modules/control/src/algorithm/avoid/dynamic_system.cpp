@@ -67,7 +67,8 @@ void DynamicSys::CalAgentsCalObsBasicInfo(port::CircleAgent& agent) {
     // 正交矩阵计算
     cal_obs.orthogonal_matrix << cal_obs.normal_vector, cal_obs.tangent_vector;
     cal_obs.basic_matrix << cal_obs.reference_vector, cal_obs.tangent_vector;
-    cal_obs.avoid_dir = CalAvoidDir(ab::g_virtual_obs[i]);
+    // cal_obs.avoid_dir = CalAvoidDir(ab::g_virtual_obs[i]);
+    cal_obs.avoid_dir = port::AvoidDir::random;
     //更新计算障碍物
     agent.calculated_obstacles[i] = cal_obs;
   }
